@@ -1,1 +1,3 @@
-# Fundamentos-de-procesamiento-de-imagenes
+# Tarea 1
+
+#lolazo
