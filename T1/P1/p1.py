@@ -19,13 +19,8 @@ def image(name, path):
     Xbgr = cv2.imread(name)
     imagen = cv2.cvtColor(Xbgr, cv2.COLOR_BGR2RGB) # conversión de BGR a RGB
 
-    return [imagen,imagen.copy()]
+    return (imagen,imagen.copy())
 
-
-#eleccion modo
-
-def eleccion_modo():
-    pass
 
 
 
@@ -81,12 +76,27 @@ def rgb_to_hsv(img: np.ndarray) -> np.ndarray:
   hsv_img = np.stack([H, S, V], axis=-1)
   return hsv_img
 
+imagen_original, imagen = image("imagen.png", path)
+
+img_hsv = rgb_to_hsv(imagen)
 
 #obtencion de h y s?
 
 
-def recorrido():
-    pass
+def recorrido(img: np.ndarray):
+    matriz_hs = []
+
+    for i in img:
+        print(i)
+        #matriz_hs.append([i[0],i[1]])
+        break 
+
+    return matriz_hs
+
+print(recorrido(img_hsv))
+
+
+    
 
 # interpolacion con la expecion ciclica
 
@@ -110,7 +120,7 @@ def mostrar_imagen():
 
 
 
-# Si queremos mostrala
+# # Si queremos mostrala
 # plt.figure(figsize= (15,8))
-# plt.imshow(Xrgb)
+# plt.imshow(imagen_hsv)
 # plt.show()
