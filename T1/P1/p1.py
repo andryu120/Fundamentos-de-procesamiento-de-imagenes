@@ -83,26 +83,40 @@ img_hsv = rgb_to_hsv(imagen)
 #obtencion de h y s?
 
 
-def recorrido(img: np.ndarray):
-    matriz_hs = []
 
-    for i in img:
-        print(i)
-        #matriz_hs.append([i[0],i[1]])
-        break 
-
-    return matriz_hs
-
-print(recorrido(img_hsv))
-
-
-    
 
 # interpolacion con la expecion ciclica
 
 
-def interpolar():
-    pass
+def interpolar(img: np.ndarray, p: list):
+    #seleccionamos los valores de h y s de la imagen
+   
+    H  = img_hsv[:, :, 0]
+    S = img_hsv[:, :, 1]
+    # interpolacion clasica
+    m_base = np.zeros_like(H)
+    #ordena de menor a mayor
+    p = sorted(p)
+    if len(p) < 2:
+        raise ValueError("Lista no tiene suficientes puntos")
+    
+    
+    for i in range(p-2):
+        h1, m1 = p[i]
+        h2, m2 = p[i+1]
+
+        
+        mascara = (H >= h1) and (H < h2)
+        m_base[mascara] = m1 + ((m2-m1)/(h2-h1)) * (H[mascara]-h1)
+
+    # para el ultimo punto
+    
+
+
+
+    
+
+    
 
 # transformacion de la saturacion
 
