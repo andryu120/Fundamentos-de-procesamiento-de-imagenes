@@ -101,16 +101,17 @@ def transformacion_lcab(img: np.ndarray, m_base: np.ndarray):
 
 
 def mostrar_imagen(img: np.ndarray):
+    import matplotlib.pyplot as plt
     # # Si queremos mostrala
-    plt.figure(figsize= (15,8))
+    plt.figure(figsize=(15,8))
     plt.imshow(img)
     plt.show()
 
 
-def color_saturation(name: str, path: str, p: list, modo: str):
-    if modo == ("HSV" or "hsv"):
+def color_saturation(imagen:  np.ndarray, p: list, modo: str):
+    if modo in ["HSV", "hsv"]:
         
-        imagen_original, imagen = image(name, path)
+       
         imagen_hsv = rgb_to_hsv(imagen)
         p = correcion_m(p)
         M = interpolar(imagen_hsv, p)
@@ -118,9 +119,9 @@ def color_saturation(name: str, path: str, p: list, modo: str):
         imagen_rgb = hsv_to_rgb(imagen_hsv, S_prima)
         return imagen_rgb
 
-    elif modo == ("CIE" or "cie" or " CIE L*c*h*"):
+    elif modo in ["CIE", "cie", " CIE L*c*h*"]:
         
-        imagen_original, imagen = image(name, path)
+        
         imagen_lch = rgb_to_lch(imagen)
         p = correcion_m(p)
         M = interpolar(imagen_lch, p)

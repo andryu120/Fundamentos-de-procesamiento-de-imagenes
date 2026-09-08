@@ -4,11 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-from procesamiento import (transformacion_hsv, )
-
-
-
-
 
 # usando HSV, hay que procesar la matriz en el espacio hsv, luego en el otro
 
@@ -76,12 +71,6 @@ def rgb_to_lch(img: np.ndarray) -> np.ndarray:
 
     lch_img = np.stack([L, C, h], axis=-1)
     return lch_img
-
-
-
-
-
-        
 
 
 
