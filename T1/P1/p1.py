@@ -23,8 +23,6 @@ def image(name, path):
 
 
 
-
-
 # usando HSV, hay que procesar la matriz en el espacio hsv, luego en el otro
 
 # codigo sacado de la capsula
@@ -80,20 +78,30 @@ imagen_original, imagen = image("imagen.png", path)
 
 img_hsv = rgb_to_hsv(imagen)
 
-#obtencion de h y s?
 
+def correcion_m(p: list):
+    "Se define un numero menor a entre 0 y 1 como atenuacion, y 1 a 10 como amplificacion, siendo 1 el neutro"
+    # Esta funcion corrige los valores otorgados en la lista p
+    
+    for i in range(len(p)):
+        if p[i][1] > 10:
+            p[i] = (p[i][0],10.0)
+        elif p[i][1] < 0:
+            p[i] = (p[i][0],0)
 
-
+    return p
+        
 
 # interpolacion con la expecion ciclica
 
 
 def interpolar(img: np.ndarray, p: list):
     #seleccionamos los valores de h y s de la imagen
-   
-    H  = img_hsv[:, :, 0]
-    S = img_hsv[:, :, 1]
+    # p es una lista con tuples
+    H  = img[:, :, 0]
     # interpolacion clasica
+
+    #copia de la matriz*** (matriz del mismo tama;o con ceros)
     m_base = np.zeros_like(H)
     #ordena de menor a mayor
     p = sorted(p)
@@ -101,40 +109,100 @@ def interpolar(img: np.ndarray, p: list):
         raise ValueError("Lista no tiene suficientes puntos")
     
     
-    for i in range(p-2):
+    for i in range(len(p)-2):
         h1, m1 = p[i]
         h2, m2 = p[i+1]
 
-        
-        mascara = (H >= h1) and (H < h2)
+        # booleano para seleccionar los puntos
+        mascara = (H >= h1) & (H < h2)
         m_base[mascara] = m1 + ((m2-m1)/(h2-h1)) * (H[mascara]-h1)
 
-    # para el ultimo punto
-    
+    #interpolacion ciclica
 
+    h_final, m_final = p[-1]
+    h_inicial, m_inicial = p[0]
 
+    mascara_ultimo_punto = (H >= h_final) | (H <h_inicial)
 
-    
+    #ajuste temporal
 
-    
+    arreglo_temporal = np.copy(H)
+
+    mascara_pixeles_bajos = (H < h_inicial)
+    arreglo_temporal[mascara_pixeles_bajos] = arreglo_temporal[mascara_pixeles_bajos] + 360.0
+    m_base[mascara_ultimo_punto] = m_final + ((m_inicial-m_final)/(h_inicial+360 - h_final)) *(arreglo_temporal[mascara_ultimo_punto] - h_final)
+
+    return m_base
+
 
 # transformacion de la saturacion
 
-def transformacion():
-    pass
+def transformacion(img: np.ndarray, m_base: np.ndarray):
+    # para transformar la matriz original, se va a multiplicar por esta nueva matriz de parametros m
+    # Saturacion
+    S = img[:, :, 1]
+
+    S_prima = S * m_base
+    return S_prima
 
 
 #actualizacion de la imagen con la nueva saturacion
 
-def actualizar_imagen():
-    pass
 
-def mostrar_imagen():
-    pass
+def hsv_to_rgb(hsv_img: np.ndarray, S: np.ndarray) -> np.ndarray:
+    # canales
+    H = hsv_img[:, :, 0]
+    S = transformacion(hsv_img, S)
+    V = hsv_img[:, :, 2]
+
+    
+    C = V * S
+    H_prime = H / 60.0
+    
+    
+    X = C * (1.0 - np.abs((H_prime % 2.0) - 1.0))
+    m = V - C
+
+   
+    R1 = np.zeros_like(H)
+    G1 = np.zeros_like(H)
+    B1 = np.zeros_like(H)
+
+
+    mask_0 = (0 <= H_prime) & (H_prime < 1)
+    mask_1 = (1 <= H_prime) & (H_prime < 2)
+    mask_2 = (2 <= H_prime) & (H_prime < 3)
+    mask_3 = (3 <= H_prime) & (H_prime < 4)
+    mask_4 = (4 <= H_prime) & (H_prime < 5)
+    mask_5 = (5 <= H_prime) & (H_prime <= 6)
+
+    R1[mask_0], G1[mask_0] = C[mask_0], X[mask_0]
+    R1[mask_1], G1[mask_1] = X[mask_1], C[mask_1]
+    G1[mask_2], B1[mask_2] = C[mask_2], X[mask_2]
+    G1[mask_3], B1[mask_3] = X[mask_3], C[mask_3]
+    R1[mask_4], B1[mask_4] = X[mask_4], C[mask_4]
+    R1[mask_5], B1[mask_5] = C[mask_5], X[mask_5]
+
+    R = R1 + m
+    G = G1 + m
+    B = B1 + m
+
+
+    rgb_img = np.stack([R, G, B], axis=-1)
+    rgb_img = rgb_img * 255.0
+
+
+    rgb_img = np.clip(rgb_img, 0, 255).astype(np.uint8)
+
+    return rgb_img
+
+
+def mostrar_imagen(img: np.ndarray):
+    # # Si queremos mostrala
+    plt.figure(figsize= (15,8))
+    plt.imshow(img)
+    plt.show()
 
 
 
-# # Si queremos mostrala
-# plt.figure(figsize= (15,8))
-# plt.imshow(imagen_hsv)
-# plt.show()
+
