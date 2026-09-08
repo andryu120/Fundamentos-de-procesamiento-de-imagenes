@@ -266,6 +266,8 @@ def lch_to_rgb(lch_img: np.ndarray, C_prima) -> np.ndarray:
     # Nota: Requiere que tengas definida la función lab_to_rgb()
     rgb_img = lab_to_rgb(lab_img)
 
+    rgb_img = np.clip(rgb_img, 0, 255).astype(np.uint8)
+
     return rgb_img
 
 
