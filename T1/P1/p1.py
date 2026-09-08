@@ -74,9 +74,23 @@ def rgb_to_hsv(img: np.ndarray) -> np.ndarray:
   hsv_img = np.stack([H, S, V], axis=-1)
   return hsv_img
 
-imagen_original, imagen = image("imagen.png", path)
 
-img_hsv = rgb_to_hsv(imagen)
+def rgb_to_lch(img: np.ndarray) -> np.ndarray:
+
+    lab = rgb_to_lab(img)
+
+    L = lab[:, :, 0]
+    a = lab[:, :, 1]
+    b = lab[:, :, 2]
+
+    C = np.sqrt(a ** 2 + b ** 2)
+    h = np.degrees(np.arctan2(b, a))
+    h = np.where(h < 0, h + 360.0, h)
+
+    lch_img = np.stack([L, C, h], axis=-1)
+    return lch_img
+
+
 
 
 def correcion_m(p: list):
@@ -137,13 +151,25 @@ def interpolar(img: np.ndarray, p: list):
 
 # transformacion de la saturacion
 
-def transformacion(img: np.ndarray, m_base: np.ndarray):
+def transformacion_hsv(img: np.ndarray, m_base: np.ndarray):
     # para transformar la matriz original, se va a multiplicar por esta nueva matriz de parametros m
     # Saturacion
+    
     S = img[:, :, 1]
 
     S_prima = S * m_base
     return S_prima
+
+def transformacion_lcab(mg: np.ndarray, m_base: np.ndarray):
+    
+    
+    a = lab[:, :, 1]
+    b = lab[:, :, 2]
+
+    C = np.sqrt(a ** 2 + b ** 2)
+    C_prima = C * m_base
+    return C_prima
+    
 
 
 #actualizacion de la imagen con la nueva saturacion
@@ -152,7 +178,7 @@ def transformacion(img: np.ndarray, m_base: np.ndarray):
 def hsv_to_rgb(hsv_img: np.ndarray, S: np.ndarray) -> np.ndarray:
     # canales
     H = hsv_img[:, :, 0]
-    S = transformacion(hsv_img, S)
+    S = transformacion_hsv(hsv_img, S)
     V = hsv_img[:, :, 2]
 
     
@@ -196,6 +222,28 @@ def hsv_to_rgb(hsv_img: np.ndarray, S: np.ndarray) -> np.ndarray:
 
     return rgb_img
 
+def lch_to_rgb(lch_img: np.ndarray) -> np.ndarray:
+    # Se extraen los canales L (Luminosidad), C (Croma) y h (Hue/Tono)
+    L = lch_img[:, :, 0]
+    C = lch_img[:, :, 1]
+    h = lch_img[:, :, 2]
+
+    # Convertir el ángulo h de grados a radianes para las funciones trigonométricas
+    h_rad = np.radians(h)
+
+    # Transformación de coordenadas polares (C, h) a cartesianas (a, b)
+    a = C * np.cos(h_rad)
+    b = C * np.sin(h_rad)
+
+    # Reconstruimos la imagen en el espacio de color LAB
+    lab_img = np.stack([L, a, b], axis=-1)
+
+    # Finalmente, convertimos de LAB a RGB
+    # Nota: Requiere que tengas definida la función lab_to_rgb()
+    rgb_img = lab_to_rgb(lab_img)
+
+    return rgb_img
+
 
 def mostrar_imagen(img: np.ndarray):
     # # Si queremos mostrala
@@ -206,3 +254,26 @@ def mostrar_imagen(img: np.ndarray):
 
 
 
+def color_saturation(name: str, path: str, p: list, modo: str):
+    if modo == ("HSV" or "hsv"):
+        
+        imagen_original, imagen = image(name, path)
+        imagen_hsv = rgb_to_hsv(imagen)
+        p = correcion_m(p)
+        M = interpolar(imagen_hsv, p)
+        S_prima = transformacion_hsv(imagen_hsv,M)
+        imagen_rgb = hsv_to_rgb(imagen_hsv, S_prima)
+        return imagen_rgb
+
+    elif modo == ("CIE" or "cie" or " CIE L*c*h*"):
+        
+        imagen_original, imagen = image(name, path)
+        imagen_lch = rgb_to_lch(imagen)
+        p = correcion_m(p)
+        M = interpolar(imagen_hsv, p)
+        S_prima = transformacion_lcab(imagen_hsv,M)
+        imagen_rgb = lch_to_rgb(imagen_hsv, S_prima)
+        return imagen_rgb
+    else:
+        raise ValueError("Modo incorrecto, ingrese de nuevo el modo")
+    
