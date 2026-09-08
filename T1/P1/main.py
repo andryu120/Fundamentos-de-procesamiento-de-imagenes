@@ -12,4 +12,4 @@ if __name__ == "__main__":
     
     f.mostrar_imagen(img)
     imagen_original, copia = f.image("imagen.png",path)
-    #f.mostrar_imagen(imagen_original)
+    f.mostrar_imagen(imagen_original)
