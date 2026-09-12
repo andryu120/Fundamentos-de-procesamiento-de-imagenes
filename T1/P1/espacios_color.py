@@ -57,27 +57,7 @@ def rgb_to_hsv(img: np.ndarray) -> np.ndarray:
   return hsv_img
 
 
-def rgb_to_lch(img: np.ndarray) -> np.ndarray:
-
-    lab = rgb_to_lab(img)
-
-    L = lab[:, :, 0]
-    a = lab[:, :, 1]
-    b = lab[:, :, 2]
-
-    C = np.sqrt(a ** 2 + b ** 2)
-    h = np.degrees(np.arctan2(b, a))
-    h = np.where(h < 0, h + 360.0, h)
-
-    lch_img = np.stack([L, C, h], axis=-1)
-    return lch_img
-
-
-
-
-#actualizacion de la imagen con la nueva saturacion
-
-
+# inversa de la funcion anterior
 def hsv_to_rgb(hsv_img: np.ndarray, S_prima: np.ndarray) -> np.ndarray:
     # canales
     H = hsv_img[:, :, 0]
@@ -125,29 +105,6 @@ def hsv_to_rgb(hsv_img: np.ndarray, S_prima: np.ndarray) -> np.ndarray:
 
     return rgb_img
 
-def _gamma_to_linear(c: np.ndarray, gamma: float = 2.2) -> np.ndarray:
-    return c ** gamma
-
-def rgb_to_xyz(img: np.ndarray) -> np.ndarray:
-
-    img = img.astype(np.float64)
-    img = img / 255.0
-
-    # Matriz CIE RGB -> XYZ. Sus filas son las ecuaciones de X, Y, Z
-    # en función de (R, G, B), por lo que hay que aplicarla como
-    # matrix @ [R, G, B] por píxel (de ahí el matrix.T al multiplicar
-    # por la imagen vista como vectores fila).
-    matrix = np.array([
-        [0.490, 0.310, 0.200],
-        [0.177, 0.813, 0.011],
-        [.000, .010, 0.990],
-    ])
-
-    rgb_linear = _gamma_to_linear(img)
-
-    xyz = rgb_linear @ matrix.T
-
-    return xyz
 
 def rgb_to_lab(img: np.ndarray) -> np.ndarray:
 
@@ -177,36 +134,77 @@ def rgb_to_lab(img: np.ndarray) -> np.ndarray:
     return lab_img
 
 
+def rgb_to_lch(img: np.ndarray) -> np.ndarray:
 
+    lab = rgb_to_lab(img)
+
+    L = lab[:, :, 0]
+    a = lab[:, :, 1]
+    b = lab[:, :, 2]
+
+    C = np.sqrt(a ** 2 + b ** 2)
+    h = np.degrees(np.arctan2(b, a))
+    h = np.where(h < 0, h + 360.0, h)
+
+    lch_img = np.stack([L, C, h], axis=-1)
+    return lch_img
+
+
+def _gamma_to_linear(c: np.ndarray, gamma: float = 2.2) -> np.ndarray:
+    return c ** gamma
+
+def rgb_to_xyz(img: np.ndarray) -> np.ndarray:
+
+    img = img.astype(np.float64)
+    img = img / 255.0
+
+    # Matriz CIE RGB -> XYZ. Sus filas son las ecuaciones de X, Y, Z
+    # en función de (R, G, B), por lo que hay que aplicarla como
+    # matrix @ [R, G, B] por píxel (de ahí el matrix.T al multiplicar
+    # por la imagen vista como vectores fila).
+
+    #matriz 1
+    matrix = np.array([
+        [0.490, 0.310, 0.200],
+        [0.177, 0.813, 0.011],
+        [.000, .010, 0.990],
+    ])
+
+
+    rgb_linear = _gamma_to_linear(img)
+
+    xyz = rgb_linear @ matrix.T
+
+    return xyz
+
+
+# esta son las inversas de las funciones anteriorres
 def _linear_to_gamma(c: np.ndarray, gamma: float = 2.2) -> np.ndarray:
-    # Se recorta en 0 para evitar que valores negativos (por errores de redondeo 
-    # o colores fuera de gama) generen "NaN" al elevar a una potencia fraccionaria.
+    # se recorta en 0 para evitar que valores negativos 
     c = np.clip(c, 0.0, None)
     return c ** (1.0 / gamma)
 
 def xyz_to_rgb(xyz: np.ndarray) -> np.ndarray:
-    # Matriz original definida en tu rgb_to_xyz
+    # matriz original 
     matrix = np.array([
         [0.490, 0.310, 0.200],
         [0.177, 0.813, 0.011],
         [.000, .010, 0.990],
     ])
     
-    # Calculamos la matriz inversa para pasar de XYZ a RGB
+    
     inv_matrix = np.linalg.inv(matrix)
-
-    # Multiplicación matricial inversa por píxel
     rgb_linear = xyz @ inv_matrix.T
     
-    # Aplicamos la inversa de la corrección gamma
+    
     img_norm = _linear_to_gamma(rgb_linear)
     
-    # Des-normalizamos al rango [0, 255]
+    # des-normalizamos al rango [0, 255]
     img = img_norm * 255.0
     return np.clip(img, 0, 255).astype(np.uint8)
 
 def lab_to_rgb(img: np.ndarray) -> np.ndarray:
-    # Los mismos parámetros base
+    # parametros base
     _X_n = 1.0
     _Y_n = 1.0
     _Z_n = 1.0
@@ -217,12 +215,12 @@ def lab_to_rgb(img: np.ndarray) -> np.ndarray:
     a = img[:, :, 1]
     b = img[:, :, 2]
 
-    # Invertimos las fórmulas para obtener fy, fx y fz
+    # invertimos para obtener fy, fx y fz
     fy = (L + 16.0) / 116.0
     fx = (a / 500.0) + fy
     fz = fy - (b / 200.0)
 
-    # Definimos la función inversa f^-1(t)
+    # definimos la función inversa f^-1(t)
     def f_inv(t):
         return np.where(
             t > delta, 
@@ -230,29 +228,29 @@ def lab_to_rgb(img: np.ndarray) -> np.ndarray:
             3.0 * (delta ** 2) * (t - 4.0 / 29.0)
         )
 
-    # Obtenemos las coordenadas normalizadas
+    #obtenemos las coordenadas normalizadas
     xr = f_inv(fx)
     yr = f_inv(fy)
     zr = f_inv(fz)
 
-    # Des-normalizamos por el iluminante
+    # des-normalizacion
     X = xr * _X_n
     Y = yr * _Y_n
     Z = zr * _Z_n
 
     xyz = np.stack([X, Y, Z], axis=-1)
     
-    # Encadenamos con la función XYZ a RGB
+    
     rgb_img = xyz_to_rgb(xyz)
     return rgb_img
 
 def lch_to_rgb(lch_img: np.ndarray, C_prima) -> np.ndarray:
-    # Se extraen los canales L (Luminosidad), C (Croma) y h (Hue/Tono)
+    # se extraen los canales L (luminosidad), C (croma) y h (hue/Tono)
     L = lch_img[:, :, 0]
     C = C_prima
     h = lch_img[:, :, 2]
 
-    # Convertir el ángulo h de grados a radianes para las funciones trigonométricas
+    # Convertir el ángulo h de grados a radianes 
     h_rad = np.radians(h)
 
     # Transformación de coordenadas polares (C, h) a cartesianas (a, b)
@@ -262,18 +260,9 @@ def lch_to_rgb(lch_img: np.ndarray, C_prima) -> np.ndarray:
     # Reconstruimos la imagen en el espacio de color LAB
     lab_img = np.stack([L, a, b], axis=-1)
 
-    # Finalmente, convertimos de LAB a RGB
-    # Nota: Requiere que tengas definida la función lab_to_rgb()
+    # finalmente, convertimos de LAB a RGB
     rgb_img = lab_to_rgb(lab_img)
-
-    rgb_img = np.clip(rgb_img, 0, 255).astype(np.uint8)
 
     return rgb_img
 
-
-def mostrar_imagen(img: np.ndarray):
-    # # Si queremos mostrala
-    plt.figure(figsize= (15,8))
-    plt.imshow(img)
-    plt.show()
 

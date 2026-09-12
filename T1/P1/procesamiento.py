@@ -17,10 +17,10 @@ def image(name, path):
         if name in files:
             ruta = os.path.join(root, name)
     name = ruta
-    Xbgr = cv2.imread(name)
+    Xbgr = cv2.imread(name,cv2.IMREAD_UNCHANGED)
     imagen = cv2.cvtColor(Xbgr, cv2.COLOR_BGR2RGB) # conversión de BGR a RGB
 
-    return (imagen,imagen.copy())
+    return (imagen,imagen.copy().astype(np.float32))
 
 def correcion_m(p: list):
     "Se define un numero menor a entre 0 y 1 como atenuacion, y 1 a 10 como amplificacion, siendo 1 el neutro"
@@ -52,7 +52,7 @@ def interpolar(img: np.ndarray, p: list):
         raise ValueError("Lista no tiene suficientes puntos")
     
     
-    for i in range(len(p)-2):
+    for i in range(len(p)-1):
         h1, m1 = p[i]
         h2, m2 = p[i+1]
 
@@ -87,15 +87,13 @@ def transformacion_hsv(img: np.ndarray, m_base: np.ndarray):
     S = img[:, :, 1]
 
     S_prima = S * m_base
+    S_prima = np.clip(S_prima, 0.0, 1.0) #para que no sature
     return S_prima
 
 def transformacion_lcab(img: np.ndarray, m_base: np.ndarray):
     
     
-    a = img[:, :, 1]
-    b = img[:, :, 2]
-
-    C = np.sqrt(a ** 2 + b ** 2)
+    C = img[:, :, 1]
     C_prima = C * m_base
     return C_prima
 
@@ -119,7 +117,7 @@ def color_saturation(imagen:  np.ndarray, p: list, modo: str):
         imagen_rgb = hsv_to_rgb(imagen_hsv, S_prima)
         return imagen_rgb
 
-    elif modo in ["CIE", "cie", " CIE L*c*h*"]:
+    elif modo in ["CIE", "cie"]:
         
         
         imagen_lch = rgb_to_lch(imagen)

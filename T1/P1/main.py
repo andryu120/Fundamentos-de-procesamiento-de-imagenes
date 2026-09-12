@@ -2,15 +2,85 @@
 from procesamiento import (mostrar_imagen, color_saturation, image)
 import os
 import cv2
+import numpy as np
 
 path = os.getcwd()
 
-p = [(0, 0.0), (120, 2.0), (240, 2.0), (350, 0.0)]
+p_rojos_amarillos = [(0, 0.0), (120, 2.0), (240, 2.0), (350, 0.0)] # apaga rojos y amarillos
+p_satura_rojos = [(10, 3.0), (60, 0.0), (120, 0.0), (240, 0.0), (340, 3.0)] #satura rojos
+p_grises = [(0, 2.0), (60, 0.0), (120, 2.0), (180, 0.0), (240, 2.0), (300, 0.0)] # colores marcados
+
+
+puntos = {
+    "apaga rojos y amarillos" : p_rojos_amarillos,
+    "satura rojos": p_satura_rojos,
+    "aumenta grises" : p_grises
+
+}
+#interaccion con el usuario
+
+def mostrar_imagenes_con_teclado(lista):
+    print("Para avanzar a la siguiente imagen presiona cualquier tecla. Presiona q o ESC para salir")
+
+    for obj in lista:
+        img = obj[1]
+        titulo = obj[0]
+        img_bgr = cv2.cvtColor(img.astype(np.float32), cv2.COLOR_RGB2BGR)
+        cv2.imshow(titulo, img_bgr)
+
+        tecla = cv2.waitKey(0)
+
+        if tecla == 113 or tecla == 27: 
+            break
+        print("Termino de esta imagen")
+        cv2.destroyAllWindows()
+
+def guardar_imagenes(imagen: tuple, numero_imagen: str , modo: str):
+    carpeta_base = f'imagenes_modificadas_{modo.lower()}'
+    #directorio final
+    ruta_final = os.path.join(os.getcwd(),carpeta_base,f'imagen_{numero_imagen}')
+    os.makedirs(ruta_final, exist_ok=True) # esto es para evitar errores con las carpetas
+    # ruta final del archivo
+    ruta_archivo = os.path.join(ruta_final, f"{imagen[0]}.tif")
+    # pasa a bgr
+    img_bgr = cv2.cvtColor(imagen[1], cv2.COLOR_RGB2BGR)
+    cv2.imwrite(ruta_archivo, img_bgr)
+    
+
 if __name__ == "__main__":
-    modo = str(input())
-    imagen_original, copia = image("imagen.png",path)
-    img = color_saturation(copia, p, modo)
+    while True:
+        modo = str(input("Elige el modo: "))
+
+        print("imagen 1, pajaros")
+
+        
+        imagen_original, imagen_cambiada = image("P1_IMG_2402.tif",path)
+        for titulo, p in puntos.items():
+            imagen_original, imagen_cambiada = image("P1_IMG_2402.tif",path)
+            img_cambiada = color_saturation(imagen_cambiada, p, modo)
+            guardar_imagenes((titulo, img_cambiada), "1", modo)
+
+        
+        guardar_imagenes(("imagen_original", imagen_original), "1", modo)
+
+        print("imagen 2, paisaje")
+        imagen_original, imagen_cambiada = image("imagen.png",path)
+        for titulo, p in puntos.items():
+            imagen_original, imagen_cambiada = image("imagen.png",path)
+            img_cambiada = color_saturation(imagen_cambiada, p, modo)
+            guardar_imagenes((titulo, img_cambiada), "2", modo)
+        
+        
+        guardar_imagenes(("imagen_original", imagen_original), "2", modo)
+
+        eleccion = str(input("Quieres cambiar de modo: "))
+
+        if eleccion not in ["Si", "si"]:
+            break
+
+
+
+
+
+
     
-    d = mostrar_imagen(img)
-    
-    mostrar_imagen(imagen_original)
