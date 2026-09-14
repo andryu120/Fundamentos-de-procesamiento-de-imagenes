@@ -19,21 +19,7 @@ puntos = {
 }
 #interaccion con el usuario
 
-def mostrar_imagenes_con_teclado(lista):
-    print("Para avanzar a la siguiente imagen presiona cualquier tecla. Presiona q o ESC para salir")
 
-    for obj in lista:
-        img = obj[1]
-        titulo = obj[0]
-        img_bgr = cv2.cvtColor(img.astype(np.float32), cv2.COLOR_RGB2BGR)
-        cv2.imshow(titulo, img_bgr)
-
-        tecla = cv2.waitKey(0)
-
-        if tecla == 113 or tecla == 27: 
-            break
-        print("Termino de esta imagen")
-        cv2.destroyAllWindows()
 
 def guardar_imagenes(imagen: tuple, numero_imagen: str , modo: str):
     carpeta_base = f'imagenes_modificadas_{modo.lower()}'
