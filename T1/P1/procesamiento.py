@@ -18,7 +18,7 @@ def image(name, path):
             ruta = os.path.join(root, name)
     name = ruta
     Xbgr = cv2.imread(name,cv2.IMREAD_UNCHANGED)
-    imagen = cv2.cvtColor(Xbgr, cv2.COLOR_BGR2RGB) # conversión de BGR a RGB
+    imagen = cv2.cvtColor(Xbgr, cv2.COLOR_BGR2RGB) # conversion de BGR a RGB
 
     return (imagen,imagen.copy().astype(np.float32))
 
@@ -35,7 +35,7 @@ def correcion_m(p: list):
     return p
 
 
-# interpolacion con la expecion ciclica
+# interpolacion con la excepcion ciclica
 
 
 def interpolar(img: np.ndarray, p: list):
@@ -87,7 +87,7 @@ def transformacion_hsv(img: np.ndarray, m_base: np.ndarray):
     S = img[:, :, 1]
 
     S_prima = S * m_base
-    S_prima = np.clip(S_prima, 0.0, 1.0) #para que no sature
+    #S_prima = np.clip(S_prima, 0.0, 1.0) 
     return S_prima
 
 def transformacion_lcab(img: np.ndarray, m_base: np.ndarray):
