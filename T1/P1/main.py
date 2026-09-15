@@ -12,8 +12,8 @@ p_combinacion = [(0, 4.0), (60, 0.0), (120, 4.0), (180, 0.0), (240, 4.0), (300, 
 
 
 puntos = {
-    "Aumento y disminucion de intervalos" : p_aumento_y_disminucion,
-    "Aumento selectivo de un intervalo de tonos": p_aumento_intervalo,
+    "Aumento y disminucion de dos intervalos" : p_aumento_y_disminucion,
+    "Aumento selectivo de un intervalo": p_aumento_intervalo,
     "Combinacion de aumentos y disminuciones" : p_combinacion
 
 }

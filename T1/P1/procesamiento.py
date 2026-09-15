@@ -72,7 +72,8 @@ def interpolar(img: np.ndarray, p: list):
     arreglo_temporal = np.copy(H)
 
     mascara_pixeles_bajos = (H < h_inicial)
-    arreglo_temporal[mascara_pixeles_bajos] = arreglo_temporal[mascara_pixeles_bajos] + 360.0
+    arreglo_temporal[mascara_pixeles_bajos] = arreglo_temporal[mascara_pixeles_bajos] + 360.0 # suma a los pixeles menores 
+    
     m_base[mascara_ultimo_punto] = m_final + ((m_inicial-m_final)/(h_inicial+360 - h_final)) *(arreglo_temporal[mascara_ultimo_punto] - h_final)
 
     return m_base

@@ -4,7 +4,7 @@ from main import puntos
 
 def graficar(punto,titulo):
     import matplotlib.pyplot as plt
-    # desernollamos el circ
+    # desenrollamos el circ
     h_inicial, m_inicial = punto[0]
     p_ext = punto + [(h_inicial+360,m_inicial)]
 
@@ -13,6 +13,7 @@ def graficar(punto,titulo):
 
     plt.figure(figsize = (10,4))
     plt.plot(h_vals,m_vals, marker='o', linestyle='-', color='b', linewidth=2)
+    plt.axhline(y=1.0, color='r', linestyle='--', label="neutro (m=1.0)")
 
     plt.title(titulo)
     plt.xlabel("hue (h)")
