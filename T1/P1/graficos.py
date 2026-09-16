@@ -1,5 +1,3 @@
-
-import numpy as np
 from main import puntos
 
 def graficar(punto,titulo):

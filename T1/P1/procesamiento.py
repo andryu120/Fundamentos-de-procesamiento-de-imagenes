@@ -129,5 +129,58 @@ def color_saturation(imagen:  np.ndarray, p: list, modo: str):
         return imagen_rgb
     else:
         raise ValueError("Modo incorrecto, ingrese de nuevo el modo")
-    
+
+def mostrar_pixeles(imagen: np.ndarray, p: list, y: int, x: int, modo: str):
+    if modo in ["HSV","hsv"]:
+
+        print(f"Coordenadas del pixel (Y={y}, X={x}) en modo {modo.upper()}")
+
+        R_orig, G_orig, B_orig = imagen[y,x]
+        print(f"Coordenadas RGB Original: (R={R_orig}, G={G_orig}, B={B_orig})")
+
+
+        img_hsv = rgb_to_hsv(imagen)
+        h, s, v = img_hsv[y,x]
+        print(f"Coordenadas HSV: (H={h}, s={s}, v={v})")
+
+
+        p = correcion_m(p)
+        m = interpolar(img_hsv, p)
+        print(f"m(h) (interpolado): {m[y,x]}")
+        
+
+        S_prima = transformacion_hsv(img_hsv, m)
+        print(f"Resultado de g(m): {S_prima[y,x]}")
+
+        img_final = hsv_to_rgb(img_hsv, S_prima)
+
+        R_final, G_final , B_final = img_final[y,x]
+        print(f"Coordenadas RGB Finales: (R={R_final}, G={G_final}, B={B_final})\n")
+
+    else:
+        print(f"Coordenadas del pixel (Y={y}, X={x}) en modo {modo.upper()}")
+        
+        R_orig, G_orig, B_orig = imagen[y,x]
+        print(f"Coordenadas RGB Original: (R={R_orig}, G={G_orig}, B={B_orig})")
+
+
+        img_cie = rgb_to_lch(imagen)
+        l, c, h = img_cie[y,x]
+        print(f"Coordenadas CIE: (L={l}, c={c}, H={h})")
+
+
+        p = correcion_m(p)
+        m = interpolar(img_cie, p)
+        print(f"m(h) (interpolado): {m[y,x]}")
+        
+
+        C_prima = transformacion_lcab(img_cie, m)
+        print(f"Resultado de g(m): {C_prima[y,x]}")
+
+        img_final = lch_to_rgb(img_cie, C_prima)
+
+        R_final, G_final , B_final = img_final[y,x]
+        print(f"Coordenadas RGB Finales: (R={R_final}, G={G_final}, B={B_final})\n")
+
+
 

@@ -1,5 +1,5 @@
 
-from procesamiento import (mostrar_imagen, color_saturation, image)
+from procesamiento import (mostrar_imagen, color_saturation, image, mostrar_pixeles)
 import os
 import cv2
 import numpy as np
@@ -8,14 +8,17 @@ path = os.getcwd()
 # puntos a probar
 p_aumento_y_disminucion = [(0, 0.0), (120, 4.0), (240, 4.0), (350, 0.0)] 
 p_aumento_intervalo = [(10, 4.0), (60, 0.0), (120, 0.0), (240, 0.0), (340, 4.0)] # aumentar rojos
-p_combinacion = [(0, 4.0), (60, 0.0), (120, 4.0), (180, 0.0), (240, 4.0), (300, 0.0)] 
+p_combinacion = [(0, 4.0), (60, 0.0), (120, 4.0), (180, 0.0), (240, 4.0), (300, 0.0)]
+
+#p_prueba = [(0,10), (340,10), (1,9)]
+p_prueba = [(120, 0.0), (122, 5.0)]
 
 
 puntos = {
-    "Aumento y disminucion de dos intervalos" : p_aumento_y_disminucion,
-    "Aumento selectivo de un intervalo": p_aumento_intervalo,
-    "Combinacion de aumentos y disminuciones" : p_combinacion
-
+    #"Aumento y disminucion de dos intervalos" : p_aumento_y_disminucion,
+    #"Aumento selectivo de un intervalo": p_aumento_intervalo,
+    #"Combinacion de aumentos y disminuciones" : p_combinacion,
+    "punto de prueba" : p_prueba
 }
 #interaccion con el usuario
 
@@ -38,7 +41,14 @@ if __name__ == "__main__":
     print("imagen 1: pajaros")
 
     
+
+    
     imagen_original, imagen_cambiada = image("P1_IMG_2402.tif",path)
+
+    #print("Mostrando pixeles para la imagen 1\n")
+    #mostrar_pixeles(imagen_original,puntos["Aumento selectivo de un intervalo"],300, 450, "hsv")
+    #mostrar_pixeles(imagen_original,puntos["Aumento selectivo de un intervalo"],300, 450, "cie")
+
     for titulo, p in puntos.items():
         imagen_original, imagen_cambiada = image("P1_IMG_2402.tif",path)
         img_cambiada_hsv = color_saturation(imagen_cambiada, p, "hsv")
