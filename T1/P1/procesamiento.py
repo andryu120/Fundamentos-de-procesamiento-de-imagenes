@@ -79,6 +79,48 @@ def interpolar(img: np.ndarray, p: list):
     return m_base
 
 
+def interpolacion_sinusoidal(img: np.ndarray, p: list) -> np.ndarray:
+    #seleccionamos los valores de h y s de la imagen
+    # p es una lista con tuples
+    H = img[:, :, 0]
+
+    m_base = np.zeros_like(H)
+    p = sorted(p)
+    if len(p) < 2:
+        raise ValueError("Lista no tiene suficientes puntos")
+
+    # interpolacion sinusoidal
+    for i in range(len(p)-1):
+        h1, m1 = p[i]
+        h2, m2 = p[i+1]
+
+        mascara = (H >= h1) & (H < h2)
+        
+        # normalizar el parametro entre 0 y 1
+        t = (H[mascara] - h1) / (h2 - h1)
+        
+        # interpolacion sinusoidal
+        m_base[mascara] = m1 + 0.5 * (m2 - m1) * (1.0 - np.cos(np.pi * t))
+
+     #interpolacion ciclica
+    h_final, m_final = p[-1]
+    h_inicial, m_inicial = p[0]
+
+    mascara_ultimo_punto = (H >= h_final) | (H < h_inicial)
+
+    arreglo_temporal = np.copy(H)
+
+    mascara_pixeles_bajos = (H < h_inicial)
+    arreglo_temporal[mascara_pixeles_bajos] = arreglo_temporal[mascara_pixeles_bajos] + 360.0 # suma a los pixeles menores 
+
+    # normalizacion de t pero en el ultimo punto
+    t_ciclico = (arreglo_temporal[mascara_ultimo_punto] - h_final) / (h_inicial + 360.0 - h_final)
+    
+    # interpolacion sinusoidal otra vez
+    m_base[mascara_ultimo_punto] = m_final + 0.5 * (m_inicial - m_final) * (1.0 - np.cos(np.pi * t_ciclico))
+
+    return m_base
+
 # transformacion de la saturacion
 
 def transformacion_hsv(img: np.ndarray, m_base: np.ndarray):
@@ -114,6 +156,7 @@ def color_saturation(imagen:  np.ndarray, p: list, modo: str):
         imagen_hsv = rgb_to_hsv(imagen)
         p = correcion_m(p)
         M = interpolar(imagen_hsv, p)
+        #M = interpolacion_sinusoidal(imagen_hsv, p)
         S_prima = transformacion_hsv(imagen_hsv,M)
         imagen_rgb = hsv_to_rgb(imagen_hsv, S_prima)
         return imagen_rgb
@@ -124,6 +167,7 @@ def color_saturation(imagen:  np.ndarray, p: list, modo: str):
         imagen_lch = rgb_to_lch(imagen)
         p = correcion_m(p)
         M = interpolar(imagen_lch, p)
+        #M = interpolacion_sinusoidal(imagen_lch, p)
         C_prima = transformacion_lcab(imagen_lch,M)
         imagen_rgb = lch_to_rgb(imagen_lch, C_prima)
         return imagen_rgb
