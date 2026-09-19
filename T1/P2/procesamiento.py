@@ -28,28 +28,6 @@ def imhist(X):
 
 
 
-def hist_forceuni(img):
-    # input: img
-    # output: equalized image y
-
-    img_x = img.copy()
-    img_x = 255 * ((img_x - img_x.min()) / (img_x.max() - img_x.min()))
-
-    n, m = img_x.shape
-    y = np.zeros((n * m, 1), dtype=np.uint8)
-    j = np.argsort(img_x.flatten())
-    z = np.zeros((n * m, 1), dtype=np.uint8)
-    d = int(np.fix((n * m / 256) + 0.5))
-
-    for i in range(255):
-        z[i * d:(i + 1) * d] = i * np.ones((d, 1))  # , dtype=np.uint8)
-    z[255 * d:n * m] = 255 * np.ones((n * m - 255 * d, 1))  # , dtype=np.uint8)
-
-    y[j] = z
-    y = y.reshape(n, m)
-
-    return y
-
 
 def malla(img, distancia_y: int, distancia_x: int):
    alto_imagen, ancho_imagen = img.shape[:2]
@@ -94,9 +72,37 @@ def calculo_cdf(region):
    s_values = np.round((n_bins-1)*cdf).astype(int)
 
    return s_values
-    
 
-def transformacion(img, distancia_y, distancia_x, alto_region: float, ancho_region: float):
+def contraste(region, control_limite: float):
+   # realiza el mismo calculo cdf pero teniendo en cuenta el contraste
+   M, n = region.shape[:2]
+   n_bins = 256
+   hist, bin_edges = np.histogram(region,bins = n_bins, range = (0,256), density = False)
+
+
+   # cuanto equivale el limite en pixeles
+   pixeles_limite = int(control_limite * (M*n))
+
+   exceso_pixeles = 0
+   for i in range(len(hist)):
+      if hist[i] > pixeles_limite:
+         exceso_pixeles += (hist[i]-pixeles_limite)
+         hist[i] = pixeles_limite
+
+   hist = hist + (exceso_pixeles // n_bins)  
+
+   pdf = hist / (M*n)
+   
+   cdf = np.cumsum(pdf) # sumatoria
+   s_values = np.round((n_bins-1)*cdf).astype(int)
+   
+   return s_values
+   
+         
+ 
+   
+
+def transformacion(img, distancia_y, distancia_x, alto_region: float, ancho_region: float, control_limite: float):
    m = np.zeros_like(img)
    centros_y, centros_x = malla(img, distancia_y, distancia_x)
    cdf_img = {}
@@ -104,7 +110,11 @@ def transformacion(img, distancia_y, distancia_x, alto_region: float, ancho_regi
    for c_y in centros_y:
       for c_x in centros_x:
          region = extraer_region(img, alto_region, ancho_region, c_y, c_x)
-         cdf_img[(c_y, c_x)] = calculo_cdf(region)
+         if control_limite == 0.0:
+            pass
+            cdf_img[(c_y, c_x)] = calculo_cdf(region)
+         else:
+            cdf_img[(c_y, c_x)] = contraste(region,control_limite)
    # ver donde caen los pixeles con relacion a los centros
    for y in range(len(img)):
       for x in range(len(img[y])):
@@ -166,16 +176,12 @@ def transformacion(img, distancia_y, distancia_x, alto_region: float, ancho_regi
        v22 = cdf_img[(y2,x2)][v]
 
         #suma ponderada de los pesos (interpolacion bilineal)
-
+    
        v_resultante = (v11*peso_y1*peso_x1)+(v12*peso_y1*peso_x2) + (v21*peso_y2*peso_x1) + (v22*peso_y2*peso_x2)
 
        m[y,x] = v_resultante
 
    return m
-
-    
-def contraste():
-   pass
 
 
 
@@ -193,6 +199,12 @@ def mostrar_imagen(img: np.ndarray):
     import matplotlib.pyplot as plt
     # # Si queremos mostrala
     plt.figure(figsize=(15,8))
-    plt.imshow(img, cmap='gray', vmin=0, vmax=255) #para que se muestren los grises
+    plt.imshow(img, cmap='gray') #para que se muestren los grises
     #plt.imshow(img)
     plt.show()
+
+
+def clahe(img):
+   clahe_cv2 = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(8, 8))
+   clahe_processed_img_cv2 = clahe_cv2.apply(img)
+   return clahe_processed_img_cv2
