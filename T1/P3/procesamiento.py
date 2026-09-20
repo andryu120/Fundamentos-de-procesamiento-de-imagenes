@@ -19,9 +19,11 @@ def image(name, type: str):
 
 
 def bilineal_interpolation(img,s: float, A: np.array):
-    new_image = np.zeros_like(img)
-    alto_new_image, ancho_new_image = s*(img.shape[:2])
+    
     alto_imagen, ancho_imagen = img.shape[:2]
+    alto_new_image = int(alto_imagen*s)
+    ancho_new_image = int(ancho_imagen*s)
+    new_image = np.zeros((alto_new_image, ancho_new_image))
     for y in range(len(new_image)):
         for x in range(len(new_image[y])):
             x_entrada = x/s
@@ -32,23 +34,58 @@ def bilineal_interpolation(img,s: float, A: np.array):
             y2 = y1 + 1
 
             #verificar que estan dentro del rango
+            if y2 >= alto_imagen:
+                peso_y1 = 1.0
+                peso_y2 = 0.0
+            else:
+                peso_y1 = (y2-y_entrada)/(y2-y1)
+                peso_y2 = (y_entrada-y1)/(y2-y1)
+            if  x2 >= ancho_imagen:
+                peso_y1 = 1.0
+                peso_y2 = 0.0
+            else:
+                peso_x1 = (x2-x_entrada)/(x2-x1)
+                peso_x2 = (x_entrada-x1)/(x2-x1)
+
+            p11= img[y1,x1] #arriba_izq 
+            p12= img[y1,x2] #arriba_der 
+            p21 = img[y2,x1] #abajo_izq
+            p22 = img[y2,x2] #arriba_der 
+
+            pixel_resultante = (p11*peso_y1*peso_x1)+(p12*peso_y1*peso_x2) + (p21*peso_y2*peso_x1) + (p22*peso_y2*peso_x2)
+            new_image[y, x] = pixel_resultante  
             
+    return new_image
 
-            #pixeles
+def vecino_cercano_interpolation(img, s: float):
+    alto_imagen, ancho_imagen = img.shape[:2]
+    alto_new_image = int(alto_imagen*s)
+    ancho_new_image = int(ancho_imagen*s)
+    new_image = np.zeros((alto_new_image, ancho_new_image))
+    for y in range(len(new_image)):
+        for x in range(len(new_image[y])):
+            x_entrada = x/s
+            y_entrada = y/s
+            x1 = int(x_entrada)
+            y1 = int(y_entrada)
 
-            
+            # manejo de bordes
+            if x1 >= ancho_imagen:
+                x1 = ancho_imagen - 1
+            if y1 >= alto_imagen:
+                y1 = alto_imagen - 1
 
-            
-            
-    pass
+            new_image[y,x] = img[y1,x1]
 
-def vecino_cercano_interpolation():
-    pass
+    return new_image
+    
 
-def escalamiento(img, intepolacion: str):
+def escalamiento(img, intepolacion: str, parametro: float):
     if intepolacion == "bilineal":
-        pass
+        imagen = bilineal_interpolation(img, parametro)
+        
         
     elif intepolacion == "vecino":
-        pass
-    pass
+        imagen = vecino_cercano_interpolation(img, parametro)
+
+    return imagen
