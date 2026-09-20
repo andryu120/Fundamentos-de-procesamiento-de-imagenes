@@ -54,7 +54,7 @@ def color_lab(name,path):
     img_lab = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2LAB)
     L, a, b = cv2.split(img_lab)
 
-    L_eq = transformacion(L, distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128, control_limite=None)
+    L_eq = transformacion(L, distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128, control_limite=0.01)
     L_eq = np.clip(L_eq, 0, 255).astype(np.uint8)
 
     img_procesada = cv2.merge((L_eq, a, b))
@@ -66,25 +66,29 @@ def color_lab(name,path):
 if __name__ == "__main__":
     img = image("P2_IMG_2423.png", path)
     alto_img, ancho_img = img.shape[:2]
+
+    # Aca se hacen todas pruebas, si se quiere realizar alguna, se descomenta la linea deseada
+    
     #imhist(img)
     #img_modificada = transformacion(img, distancia_y=alto_img, distancia_x=ancho_img, alto_region=alto_img, ancho_region=ancho_img, control_limite= None)
     #mostrar_imagen(img_modificada)
     #imhist(img_modificada)
 
     #img_modificada = transformacion(img, distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128, control_limite= 0.01)
-    #mostrar_imagen(img_modificada)
+    
+    
 
     #mostrar_region_homogenea(img,distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128)
 
     #img_clahe = clahe(img)
     #mostrar_imagen(img_clahe)
     # mostrar_imagen(gravel)
+
     #comparacion(gravel,0.01, 2.0, (32,32))
-    #comparacion(img,0.01, 2.0, (32,32))
 
     # comparacion(gravel,0.1, 10, (16,16))
     # comparacion(img,0.1, 10, (16,16))
-    color_lab("imagen.jpg", path)
+    #color_lab("imagen.jpg", path)
     
 
 
