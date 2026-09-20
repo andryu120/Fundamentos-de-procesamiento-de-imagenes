@@ -92,7 +92,7 @@ def contraste(region, control_limite: float):
    n_bins = 256
    hist, bin_edges = np.histogram(region,bins = n_bins, range = (0,256), density = False)
 
-
+   # el control de limite va de [1,0.0], son porcentajes
    # cuanto equivale el limite en pixeles
    pixeles_limite = int(control_limite * (M*n))
 
@@ -102,7 +102,7 @@ def contraste(region, control_limite: float):
          exceso_pixeles += (hist[i]-pixeles_limite)
          hist[i] = pixeles_limite
 
-   hist = hist + (exceso_pixeles // n_bins)  
+   hist = hist + (exceso_pixeles / n_bins)  
 
    pdf = hist / (M*n)
    
@@ -171,7 +171,7 @@ def transformacion(img, distancia_y, distancia_x, alto_region: int, ancho_region
    for c_y in centros_y:
       for c_x in centros_x:
          region = extraer_region(img, alto_region, ancho_region, c_y, c_x)
-         if control_limite == 0.0:
+         if control_limite is None:
             cdf_img[(c_y, c_x)] = calculo_cdf(region)
          else:
             cdf_img[(c_y, c_x)] = contraste(region,control_limite)
@@ -229,6 +229,11 @@ def transformacion(img, distancia_y, distancia_x, alto_region: int, ancho_region
        else:
         peso_x1 = (x2-x)/(x2-x1)
         peso_x2 = (x-x1)/(x2-x1)
+
+      #  peso_y1 = 1.0
+      #  peso_y2 = 0.0
+      #  peso_x1 = 1.0
+      #  peso_x2 = 0.0
        
        v11 = cdf_img[(y1,x1)][v]
        v12 = cdf_img[(y1,x2)][v]
@@ -340,7 +345,7 @@ def mostrar_imagen(img: np.ndarray):
     plt.show()
 
 
-def clahe(img):
-   clahe_cv2 = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(8, 8))
+def clahe(img, clipLimit: float, tileGridSize: tuple):
+   clahe_cv2 = cv2.createCLAHE(clipLimit=clipLimit, tileGridSize=tileGridSize)
    clahe_processed_img_cv2 = clahe_cv2.apply(img)
    return clahe_processed_img_cv2
