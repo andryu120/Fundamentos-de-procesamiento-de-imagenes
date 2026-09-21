@@ -11,19 +11,27 @@ def image(name, type: str):
     name = ruta
     if type == "gray":
         imagen = cv2.imread(name, cv2.IMREAD_GRAYSCALE) # leer en escalas de grises
+        return imagen
     else:
         Xbgr = cv2.imread(name,cv2.IMREAD_UNCHANGED)
         imagen = cv2.cvtColor(Xbgr, cv2.COLOR_BGR2RGB) # conversion de BGR a RGB
+        return imagen.astype(np.float64)
 
-    return imagen
+   
 
 
-def bilineal_interpolation(img,s: float, A: np.array):
+def bilineal_interpolation(img,s: float):
     
     alto_imagen, ancho_imagen = img.shape[:2]
     alto_new_image = int(alto_imagen*s)
     ancho_new_image = int(ancho_imagen*s)
-    new_image = np.zeros((alto_new_image, ancho_new_image))
+    # detectar si es en escala de grises o rgb
+    if len(img.shape) == 3:
+       canales = img.shape[2]
+       new_image = np.zeros((alto_new_image, ancho_new_image, canales))
+    else:
+       new_image = np.zeros((alto_new_image, alto_new_image))
+    
     for y in range(len(new_image)):
         for x in range(len(new_image[y])):
             x_entrada = x/s
@@ -61,7 +69,12 @@ def vecino_cercano_interpolation(img, s: float):
     alto_imagen, ancho_imagen = img.shape[:2]
     alto_new_image = int(alto_imagen*s)
     ancho_new_image = int(ancho_imagen*s)
-    new_image = np.zeros((alto_new_image, ancho_new_image))
+    # detectar si es en escala de grises o rgb
+    if len(img.shape) == 3:
+        canales = img.shape[2]
+        new_image = np.zeros((alto_new_image, ancho_new_image, canales))
+    else:
+        new_image = np.zeros((alto_new_image, alto_new_image))
     for y in range(len(new_image)):
         for x in range(len(new_image[y])):
             x_entrada = x/s
@@ -89,3 +102,16 @@ def escalamiento(img, intepolacion: str, parametro: float):
         imagen = vecino_cercano_interpolation(img, parametro)
 
     return imagen
+
+def guardar_imagen(img, type: str, titulo: str):
+    ruta_carpeta = os.path.join(os.getcwd(), "imagenes")
+    nombre_archivo = f"{titulo}.jpg"
+    ruta_completa = os.path.join(ruta_carpeta, nombre_archivo)
+    if type == "gray":
+        cv2.imwrite(ruta_completa, img)
+    else:
+        # Revertir de RGB a BGR para que cv2.imwrite guarde los colores correctos
+        img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(ruta_completa, img_bgr)
+
+
