@@ -230,7 +230,7 @@ def transformacion(img, distancia_y, distancia_x, alto_region: int, ancho_region
         peso_x1 = (x2-x)/(x2-x1)
         peso_x2 = (x-x1)/(x2-x1)
 
-      # esto es para la eliminar pesos
+      # esto es para la eliminar pesos, parte 7
       #  peso_y1 = 1.0
       #  peso_y2 = 0.0
       #  peso_x1 = 1.0

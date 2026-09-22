@@ -69,28 +69,28 @@ if __name__ == "__main__":
 
     # Aca se hacen todas pruebas, si se quiere realizar alguna, se descomenta la linea deseada
 
-    #1
+    #1 Ecualizacion global
     # img_global = transformacion(img, distancia_y=alto_img, distancia_x=ancho_img, alto_region=alto_img, ancho_region=ancho_img, control_limite=None)
     # mostrar_imagen(img_global)
     # imhist(img_global)
 
-    #2,3
+    #2,3 Pruebas de bins, malla, overlap y region homogenea
     # probar_distancias(img)
     # probar_overlap(img)
     # probar_bin(img)
     # mostrar_region_homogenea(img, distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128)
 
-    #4
+    #4 explorar limites
     # probar_limite(img)
     # probar_limite(gravel)
     
-    #5
+    #5 Comparacion entre CLAHE y metodo propio
     # Config 1 
     # comparacion(gravel, dist=64, reg=128, limite=0.01, clipLimiter=2.0, tileGridSize=(16,16))
     # Config 2 
     # comparacion(gravel, dist=64, reg=128, limite=0.1, clipLimiter=10.0, tileGridSize=(16,16))
     
-    # 6.
+    # 6. Macro vs Micro (regiones)
     # Micro:
     # comparacion(img, dist=16, reg=32, limite=0.1, clipLimiter=2.0, tileGridSize=(32,32))
     # Macro:
@@ -98,14 +98,14 @@ if __name__ == "__main__":
     
 
     
-    #7 
-    # NOTA: Para probar esto, se modificó temporalmente procesamiento.py
+    #7 Discontinuidades
+    # NOTA: Para probar esto, se tiene que modificar temporalmente procesamiento.py
     # forzando los pesos a: peso_y1 = 1.0, peso_y2 = 0.0, peso_x1 = 1.0, peso_x2 = 0.0
     # img = transformacion(img, distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128, control_limite=None)
     # mostrar_imagen(img)
 
 
-    #8
+    #8 CIELAB 
     # color_lab("imagen.jpg", path)
     
     

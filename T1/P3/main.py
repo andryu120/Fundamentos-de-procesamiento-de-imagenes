@@ -67,25 +67,25 @@ guardar_imagen(gravel, "gray", "gravel")
 if __name__ == "__main__":
     img = image("P3_IMG_2387_crop.tif","rgb")
     
-    #1 a 4
-    #
-    # for i in [0.5,0.8,1.5,1.9]:
-    #     imagen_modificada = escalamiento(img,"bilineal",i)
-    #     imagen_modificada_gravel = escalamiento(gravel,"bilineal",i)
-    #     guardar_imagen(imagen_modificada,"rgb" ,f' Imagen Tigre, Escalamiento bilineal con parametro s = {i}')
-    #     guardar_imagen(imagen_modificada_gravel,"gray" ,f'Imagen Gravel, Escalamiento bilineal con parametro s = {i}')
-    #     imagen_modificada = escalamiento(img,"vecino",i)
-    #     imagen_modificada_gravel = escalamiento(gravel,"vecino",i)
-    #     guardar_imagen(imagen_modificada,"rgb" ,f'Imagen Tigre, Escalamiento vecino mas cercano con parametro s = {i}')
-    #     guardar_imagen(imagen_modificada_gravel,"gray" ,f'Imagen Gravel, Escalamiento vecino mas cercano con parametro s = {i}')
-    # # 5
-    # img_reducida = escalamiento(gravel,"bilineal",0.5)
-    # img_ampliada = escalamiento(img_reducida,"bilineal",2)
-    # guardar_imagen(img_ampliada, "gray", "Imagen Gravel, bilineal, imagen recuperada")
-    # img_reducida = escalamiento(gravel,"vecino",0.5)
-    # img_ampliada = escalamiento(img_reducida,"vecino",2)
-    # guardar_imagen(img_ampliada, "gray", "Imagen Gravel,vecino cercano, imagen recuperada")
-    #6
+    # 1 a 4
+    
+    for i in [0.5,0.8,1.5,1.9]:
+        imagen_modificada = escalamiento(img,"bilineal",i)
+        imagen_modificada_gravel = escalamiento(gravel,"bilineal",i)
+        guardar_imagen(imagen_modificada,"rgb" ,f' Imagen Tigre, Escalamiento bilineal con parametro s = {i}')
+        guardar_imagen(imagen_modificada_gravel,"gray" ,f'Imagen Gravel, Escalamiento bilineal con parametro s = {i}')
+        imagen_modificada = escalamiento(img,"vecino",i)
+        imagen_modificada_gravel = escalamiento(gravel,"vecino",i)
+        guardar_imagen(imagen_modificada,"rgb" ,f'Imagen Tigre, Escalamiento vecino mas cercano con parametro s = {i}')
+        guardar_imagen(imagen_modificada_gravel,"gray" ,f'Imagen Gravel, Escalamiento vecino mas cercano con parametro s = {i}')
+    # 5
+    img_reducida = escalamiento(gravel,"bilineal",0.5)
+    img_ampliada = escalamiento(img_reducida,"bilineal",2)
+    guardar_imagen(img_ampliada, "gray", "Imagen Gravel, bilineal, imagen recuperada")
+    img_reducida = escalamiento(gravel,"vecino",0.5)
+    img_ampliada = escalamiento(img_reducida,"vecino",2)
+    guardar_imagen(img_ampliada, "gray", "Imagen Gravel,vecino cercano, imagen recuperada")
+    6
     img1 = escalamiento(gravel,"bilineal",1.9)
     img2 = escalamiento(img1,"bilineal",0.8)
     img3 = escalamiento(img2,"bilineal",0.5)
@@ -93,25 +93,25 @@ if __name__ == "__main__":
     img_equivalente  = escalamiento(gravel,"bilineal",0.76)
     guardar_imagen(img_equivalente, "gray", "Imagen Gravel,bilineal, escalada s = 0.76")
 
-    # #7
+    #7
 
-    # img_aliasing = escalamiento(gravel, "bilineal", 0.1)
-    # guardar_imagen(img_aliasing, "gray", "Imagen Gravel, aliasing, s = 0.1")
-    # img_aliasing = escalamiento(img, "bilineal", 0.1)
-    # guardar_imagen(img_aliasing, "rgb", "Imagen Tigre, aliasing, s = 0.1")
-    # img_aliasing = escalamiento(gravel, "vecino", 0.1)
-    # guardar_imagen(img_aliasing, "gray", "Imagen Gravel,vecino cercano, aliasing, s = 0.1")
-    # img_aliasing = escalamiento(img, "vecino", 0.1)
-    # guardar_imagen(img_aliasing, "rgb", "Imagen Tigre,vecino cercano, aliasing, s = 0.1")
+    img_aliasing = escalamiento(gravel, "bilineal", 0.1)
+    guardar_imagen(img_aliasing, "gray", "Imagen Gravel, aliasing, s = 0.1")
+    img_aliasing = escalamiento(img, "bilineal", 0.1)
+    guardar_imagen(img_aliasing, "rgb", "Imagen Tigre, aliasing, s = 0.1")
+    img_aliasing = escalamiento(gravel, "vecino", 0.1)
+    guardar_imagen(img_aliasing, "gray", "Imagen Gravel,vecino cercano, aliasing, s = 0.1")
+    img_aliasing = escalamiento(img, "vecino", 0.1)
+    guardar_imagen(img_aliasing, "rgb", "Imagen Tigre,vecino cercano, aliasing, s = 0.1")
 
-    # #8
+    #8
 
-    # img_bicubica = bicubica_interpolation(gravel, 4.2)
-    # img_bilineal = escalamiento(gravel, "bilineal", 4.2)
-    # img_vecino = escalamiento(gravel, "vecino", 4.2)
-    # guardar_imagen(img_bicubica, "gray", "Imagen Gravel, bicubica , s = 4.2")
-    # guardar_imagen(img_bilineal, "gray", "Imagen Gravel, bilineal , s = 4.2")
-    # guardar_imagen(img_vecino, "gray", "Imagen Gravel, vecino cercano, s = 4.2")
+    img_bicubica = bicubica_interpolation(gravel, 4.2)
+    img_bilineal = escalamiento(gravel, "bilineal", 4.2)
+    img_vecino = escalamiento(gravel, "vecino", 4.2)
+    guardar_imagen(img_bicubica, "gray", "Imagen Gravel, bicubica , s = 4.2")
+    guardar_imagen(img_bilineal, "gray", "Imagen Gravel, bilineal , s = 4.2")
+    guardar_imagen(img_vecino, "gray", "Imagen Gravel, vecino cercano, s = 4.2")
 
 
 
