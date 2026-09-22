@@ -36,10 +36,11 @@ def guardar_imagenes(imagen: tuple, numero_imagen: str , modo: str):
     ruta_final = os.path.join(os.getcwd(),carpeta_base,f'imagen_{numero_imagen}')
     os.makedirs(ruta_final, exist_ok=True) # esto es para evitar errores con las carpetas
     # ruta final del archivo
-    ruta_archivo = os.path.join(ruta_final, f"{imagen[0]}.tif")
+    ruta_archivo = os.path.join(ruta_final, f"{imagen[0]}.png")
     # pasa a bgr
     img_bgr = cv2.cvtColor(imagen[1], cv2.COLOR_RGB2BGR)
-    cv2.imwrite(ruta_archivo, img_bgr)
+    params_png = [cv2.IMWRITE_PNG_COMPRESSION, 9]
+    cv2.imwrite(ruta_archivo, img_bgr,params_png)
     
 
 if __name__ == "__main__":
