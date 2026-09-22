@@ -36,9 +36,9 @@ def probar_limite(img):
         imhist(img_modificada)
 
 
-def comparacion(img, limite, clipLimiter, tileGridSize):
+def comparacion(img,dist, reg, limite, clipLimiter, tileGridSize):
     
-    img_modificada = transformacion(img, distancia_y=16, distancia_x=16, alto_region=32, ancho_region=32, control_limite= limite)
+    img_modificada = transformacion(img, distancia_y=dist, distancia_x=dist, alto_region=reg, ancho_region=reg, control_limite= limite)
     mostrar_imagen(img_modificada)
     imhist(img_modificada)
     img_clahe = clahe(img, clipLimiter, tileGridSize)
@@ -68,27 +68,46 @@ if __name__ == "__main__":
     alto_img, ancho_img = img.shape[:2]
 
     # Aca se hacen todas pruebas, si se quiere realizar alguna, se descomenta la linea deseada
+
+    #1
+    # img_global = transformacion(img, distancia_y=alto_img, distancia_x=ancho_img, alto_region=alto_img, ancho_region=ancho_img, control_limite=None)
+    # mostrar_imagen(img_global)
+    # imhist(img_global)
+
+    #2,3
+    # probar_distancias(img)
+    # probar_overlap(img)
+    # probar_bin(img)
+    # mostrar_region_homogenea(img, distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128)
+
+    #4
+    # probar_limite(img)
+    # probar_limite(gravel)
     
-    #imhist(img)
-    #img_modificada = transformacion(img, distancia_y=alto_img, distancia_x=ancho_img, alto_region=alto_img, ancho_region=ancho_img, control_limite= None)
-    #mostrar_imagen(img_modificada)
-    #imhist(img_modificada)
-
-    #img_modificada = transformacion(img, distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128, control_limite= 0.01)
+    #5
+    # Config 1 
+    # comparacion(gravel, dist=64, reg=128, limite=0.01, clipLimiter=2.0, tileGridSize=(16,16))
+    # Config 2 
+    # comparacion(gravel, dist=64, reg=128, limite=0.1, clipLimiter=10.0, tileGridSize=(16,16))
     
+    # 6.
+    # Micro:
+    # comparacion(img, dist=16, reg=32, limite=0.1, clipLimiter=2.0, tileGridSize=(32,32))
+    # Macro:
+    # comparacion(img, dist=128, reg=256, limite=0.1, clipLimiter=2.0, tileGridSize=(4,4))
     
 
-    #mostrar_region_homogenea(img,distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128)
+    
+    #7 
+    # NOTA: Para probar esto, se modificó temporalmente procesamiento.py
+    # forzando los pesos a: peso_y1 = 1.0, peso_y2 = 0.0, peso_x1 = 1.0, peso_x2 = 0.0
+    # img = transformacion(img, distancia_y=64, distancia_x=64, alto_region=128, ancho_region=128, control_limite=None)
+    # mostrar_imagen(img)
 
-    #img_clahe = clahe(img)
-    #mostrar_imagen(img_clahe)
-    # mostrar_imagen(gravel)
 
-    #comparacion(gravel,0.01, 2.0, (32,32))
-
-    # comparacion(gravel,0.1, 10, (16,16))
-    # comparacion(img,0.1, 10, (16,16))
-    #color_lab("imagen.jpg", path)
+    #8
+    # color_lab("imagen.jpg", path)
+    
     
 
 
