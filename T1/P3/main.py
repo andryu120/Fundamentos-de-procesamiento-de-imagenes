@@ -85,7 +85,7 @@ if __name__ == "__main__":
     img_reducida = escalamiento(gravel,"vecino",0.5)
     img_ampliada = escalamiento(img_reducida,"vecino",2)
     guardar_imagen(img_ampliada, "gray", "Imagen Gravel,vecino cercano, imagen recuperada")
-    6
+    #6
     img1 = escalamiento(gravel,"bilineal",1.9)
     img2 = escalamiento(img1,"bilineal",0.8)
     img3 = escalamiento(img2,"bilineal",0.5)
