@@ -10,6 +10,7 @@ size_rectangle = 128
 radius_circle = 32
 
 image = np.zeros((256,256),dtype=np.uint8)
+imagen_negro = np.zeros((256,256),dtype=np.uint8)
 
 
 y,x = np.ogrid[:alto,:ancho]
