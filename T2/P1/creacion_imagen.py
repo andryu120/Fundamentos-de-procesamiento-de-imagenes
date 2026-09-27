@@ -9,9 +9,8 @@ alto, ancho = 256,256
 size_rectangle = 128
 radius_circle = 32
 
-image = np.zeros((256,256,1),dtype=np.uint8)
+image = np.zeros((256,256),dtype=np.uint8)
 
-image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # conversion de BGR a RGB
 
 y,x = np.ogrid[:alto,:ancho]
 #hacer las mascaras
@@ -28,6 +27,12 @@ image[mascara_circulo] = 255.0*0.8
 image[mascara_exterior] = 255.0*0.15
                 
 
+def mostrar_imagen(img: np.ndarray):
+    import matplotlib.pyplot as plt
+    # # Si queremos mostrala
+    plt.figure(figsize=(15,8))
+    plt.imshow(img)
+    plt.show()
         
 
 
@@ -46,3 +51,7 @@ def agregar_ruido_poisson(imagen, lam):
     return imagen_ruidosa
 
 imagen_ruidosa = agregar_ruido_poisson(image,40)
+
+# imagen_ruidosa = cv2.cvtColor(imagen_ruidosa, cv2.COLOR_GRAY2RGB)
+
+# mostrar_imagen(imagen_ruidosa)
