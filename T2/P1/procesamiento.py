@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
-
 import scipy
+from creacion_imagen import (mascara_circulo, mascara_exterior, mascara_rectangulo)
 
 #creacion imagen
 
@@ -28,10 +28,12 @@ def kernel_gaussiano(sigma: int):
     return kernel
 
 def filtro_gaussiano(imagen, sigma: int):
+    imagen = imagen.copy()
     kernel_gauss = kernel_gaussiano(sigma)
     imagen_conv = scipy.signal.convolve2d(imagen, kernel_gauss, mode='same')
     
     return imagen_conv
+
 
 
 def rmse(imagen_referencia: np.ndarray, imagen_estimada: np.ndarray) -> float:
@@ -47,8 +49,58 @@ def rmse(imagen_referencia: np.ndarray, imagen_estimada: np.ndarray) -> float:
     return float(np.sqrt(np.mean((referencia - estimada) ** 2)))
 
 
-def filtro_gaussiano_adap(imagen):
-    pass
+
+def filtro_gaussiano_adap(imagen, func_sigma,  valores_minimos: dict, interpolado: str):
+    imagen = imagen.copy()
+    #funcion por partes
+    imagen_filtrada = np.zeros_like(imagen)
+    intensidades = [255 * 0.15, 255 * 0.45, 255 * 0.80] 
+
+    sigmas_optimos = [valores_minimos["Minimo Exterior"], valores_minimos["Minimo Rectangulo"], valores_minimos["Minimo Circulo"]]
+    
+    mu = filtro_gaussiano(imagen, func_sigma)
+    
+    mapeo_sigma = np.interp(mu.flatten(), intensidades, sigmas_optimos).reshape(mu.shape)
+
+    imagen_ex = filtro_gaussiano(imagen, valores_minimos["Minimo Exterior"])
+    imagen_rect = filtro_gaussiano(imagen, valores_minimos["Minimo Rectangulo"])
+    imagen_circ = filtro_gaussiano(imagen, valores_minimos["Minimo Circulo"])
+
+
+    if interpolado not in ["Si", "si"]:
+
+        mascara_fondo_est = mu < 0.3*255
+        mascara_cuadrado_est = (mu >= 0.3*255) & (mu < 0.6*255)
+        mascara_circulo_est = mu >= 0.6*255
+
+        imagen_filtrada[mascara_fondo_est] = imagen_ex[mascara_fondo_est]
+        imagen_filtrada[mascara_cuadrado_est] = imagen_rect[mascara_cuadrado_est]
+        imagen_filtrada[mascara_circulo_est] = imagen_circ[mascara_circulo_est]
+
+        return imagen_filtrada, mapeo_sigma
+
+    else:
+        # para interpolar, calculamos los pesos respectivos usando las intensidades
+        # primero del fondo al cuadrado
+        print("ael")
+
+        peso_cuadrado_v1 = np.clip((mu - intensidades[0]) / (intensidades[1] - intensidades[0]), 0, 1)
+        peso_fondo = 1.0 - peso_cuadrado_v1
+
+        # ahora del cuadrado al circulo
+
+        peso_circulo = np.clip((mu - intensidades[1]) / (intensidades[2] - intensidades[1]), 0, 1)
+        peso_cuadrado_v2 = 1.0 - peso_circulo
+
+        # el peso del cuadrado como tal es la interseccion entre ambas regiones
+        peso_cuadrado = np.minimum(peso_cuadrado_v1, peso_cuadrado_v2)
+
+        imagen_filtrada = (imagen_ex * peso_fondo) + (imagen_rect * peso_cuadrado) + (imagen_circ * peso_circulo)
+
+        return imagen_filtrada
+
+
+
 
 def suaviado_gauss():
     pass
