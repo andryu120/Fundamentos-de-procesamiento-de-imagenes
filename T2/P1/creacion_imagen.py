@@ -19,9 +19,12 @@ y,x = np.ogrid[:alto,:ancho]
 limite_inferior = size_rectangle - (size_rectangle / 2) 
 limite_superior = size_rectangle + (size_rectangle / 2) 
 mascara_rectangulo = (x >= limite_inferior) & (x <= limite_superior) & (y >= limite_inferior) & (y <= limite_superior)
+
 mascara_exterior = (x < limite_inferior) | (x > limite_superior) | (y < limite_inferior) | (y > limite_superior)
 #mascara circulo
 mascara_circulo = ((x - ancho/2)**2 +(y - alto/2)**2 <= radius_circle**2)
+
+mascara_rectangulo = mascara_rectangulo & ~mascara_circulo
 
 image[mascara_rectangulo] = 255.0*0.45
 image[mascara_circulo] = 255.0*0.8
@@ -50,6 +53,8 @@ def agregar_ruido_poisson(imagen, lam):
     imagen_ruidosa = np.clip(imagen_ruidosa, 0, 255)
     imagen_ruidosa = imagen_ruidosa.astype(np.uint8)
     return imagen_ruidosa
+
+np.random.seed(20) #semilla aleatoria
 
 imagen_ruidosa = agregar_ruido_poisson(image,40)
 

@@ -13,7 +13,7 @@ def mostrar_imagen(img: np.ndarray):
     plt.show()
 
 
-def kernel_gaussiano(sigma: int):
+def kernel_gaussiano(sigma: float):
     
     # el valor recomendado para el soporte del filtro es 4*sigma + 1 
     size = 2*(int(np.ceil(2*sigma))) + 1
@@ -27,7 +27,7 @@ def kernel_gaussiano(sigma: int):
 
     return kernel
 
-def filtro_gaussiano(imagen, sigma: int):
+def filtro_gaussiano(imagen, sigma: float):
     imagen = imagen.copy()
     kernel_gauss = kernel_gaussiano(sigma)
     imagen_conv = scipy.signal.convolve2d(imagen, kernel_gauss, mode='same')
@@ -60,7 +60,7 @@ def filtro_gaussiano_adap(imagen, func_sigma,  valores_minimos: dict, interpolad
     
     mu = filtro_gaussiano(imagen, func_sigma)
     
-    mapeo_sigma = np.interp(mu.flatten(), intensidades, sigmas_optimos).reshape(mu.shape)
+    
 
     imagen_ex = filtro_gaussiano(imagen, valores_minimos["Minimo Exterior"])
     imagen_rect = filtro_gaussiano(imagen, valores_minimos["Minimo Rectangulo"])
@@ -77,12 +77,19 @@ def filtro_gaussiano_adap(imagen, func_sigma,  valores_minimos: dict, interpolad
         imagen_filtrada[mascara_cuadrado_est] = imagen_rect[mascara_cuadrado_est]
         imagen_filtrada[mascara_circulo_est] = imagen_circ[mascara_circulo_est]
 
-        return imagen_filtrada, mapeo_sigma
+        mapeo_sigma_discreto = np.zeros_like(mu)
+
+        
+        mapeo_sigma_discreto[mu < 0.3*255] = valores_minimos["Minimo Exterior"]
+        mapeo_sigma_discreto[(mu >= 0.3*255) & (mu < 0.6*255)] = valores_minimos["Minimo Rectangulo"]
+        mapeo_sigma_discreto[mu >= 0.6*255] = valores_minimos["Minimo Circulo"]
+
+        return imagen_filtrada, mapeo_sigma_discreto 
 
     else:
         # para interpolar, calculamos los pesos respectivos usando las intensidades
         # primero del fondo al cuadrado
-        print("ael")
+        
 
         peso_cuadrado_v1 = np.clip((mu - intensidades[0]) / (intensidades[1] - intensidades[0]), 0, 1)
         peso_fondo = 1.0 - peso_cuadrado_v1
@@ -97,10 +104,6 @@ def filtro_gaussiano_adap(imagen, func_sigma,  valores_minimos: dict, interpolad
 
         imagen_filtrada = (imagen_ex * peso_fondo) + (imagen_rect * peso_cuadrado) + (imagen_circ * peso_circulo)
 
-        return imagen_filtrada
+        mapeo_sigma_continuo = np.interp(mu.flatten(), intensidades, sigmas_optimos).reshape(mu.shape)
 
-
-
-
-def suaviado_gauss():
-    pass
+        return imagen_filtrada, mapeo_sigma_continuo

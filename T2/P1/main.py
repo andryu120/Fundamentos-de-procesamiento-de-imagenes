@@ -41,10 +41,7 @@ def graficar_error(imagen_original, imagen_ruidosa, graficar: str):
         error_circulo = rmse(imagen_original[mascara_circulo], imagen_filtrada[mascara_circulo])
         lista_error_R3.append(error_circulo)
     
-        minimo_global = np.argmin(lista_error_global)
-        minimo_R1 = np.argmin(lista_error_R1)
-        minimo_R2 = np.argmin(lista_error_R2)
-        minimo_R3 = np.argmin(lista_error_R3)
+        
     
 
     #minimos (en el eje x)
@@ -85,31 +82,43 @@ def graficar_error(imagen_original, imagen_ruidosa, graficar: str):
         plt.grid(True, linestyle=':', alpha=0.7)
         plt.show()
 
-    return (lista_error_global[minimo_global], lista_error_R1[minimo_R1], lista_error_R2[minimo_R2], lista_error_R3[minimo_R3])
+    return (valores[minimo_global], valores[minimo_R1], valores[minimo_R2], valores[minimo_R3])
 
+def graficar_mapeo(mapeo, tipo: str):
+    plt.figure(figsize=(8, 6))
+    # Usamos el colormap 'viridis' (o 'plasma') que es ideal para mapas de calor
+    plt.imshow(mapeo, cmap='viridis') 
+    plt.colorbar(label='Valor de Sigma')
+    plt.title(f'Mapa sigma(x,y) utilizado, {tipo}')
+    plt.show()
+    
+    pass
 
-
-def comparacion(imagen,imagen_adaptativa, valores_minimos):
+def comparacion(imagen, imagen_filtrada_normal, imagen_adaptativa, valores_minimos):
     imagen_adaptativa = imagen_adaptativa.copy()
     rmse_adap_global = rmse(imagen, imagen_adaptativa)
     rmse_adap_fondo = rmse(imagen[mascara_exterior], imagen_adaptativa[mascara_exterior])
-    rmse_adap_cuad = rmse(imagen[mascara_rectangulo], imagen_adaptativa[mascara_rectangulo])
+    rmse_adap_rect = rmse(imagen[mascara_rectangulo], imagen_adaptativa[mascara_rectangulo])
     rmse_adap_circ = rmse(imagen[mascara_circulo], imagen_adaptativa[mascara_circulo])
+    rmse_normal_global  = rmse(imagen, imagen_filtrada_normal)
+    rmse_normal_fondo = rmse(imagen[mascara_exterior], imagen_filtrada_normal[mascara_exterior])
+    rmse_normal_rect = rmse(imagen[mascara_rectangulo], imagen_filtrada_normal[mascara_rectangulo])
+    rmse_normal_circ = rmse(imagen[mascara_circulo], imagen_filtrada_normal[mascara_circulo])
     print("Comparacion \n")
 
-    print(f"{'Región':<12} | {'Mejor Global':<15} | {'Adaptativo':<15}  \n")
+    print(f"{'Región':<12} | {'Mejor Global':<15} | {'Adaptativo':<15}")
 
-    print(f"{'Fondo':<12} | {valores_minimos['Minimo Exterior']:<15.2f} | {rmse_adap_fondo:<15.2f}")
-    print(f"{'Cuadrado':<12} | {valores_minimos['Minimo Rectangulo']:<15.2f} | {rmse_adap_cuad:<15.2f}")
-    print(f"{'Círculo':<12} | {valores_minimos['Minimo Circulo']:<15.2f} | {rmse_adap_circ:<15.2f}")
-    print("-" * 48)
-    print(f"{'Global':<12} | {valores_minimos['Minimo Global']:<15.2f} | {rmse_adap_global:<15.2f}")
+    print(f"{'Fondo':<12} | {rmse_normal_fondo:<15.2f} | {rmse_adap_fondo:<15.2f}")
+    print(f"{'Cuadrado':<12} | {rmse_normal_rect:<15.2f} | {rmse_adap_rect:<15.2f}")
+    print(f"{'Círculo':<12} | {rmse_normal_circ:<15.2f} | {rmse_adap_circ:<15.2f}")
+    
+    print(f"{'Global':<12} | {rmse_normal_global:<15.2f} | {rmse_adap_global:<15.2f}")
     
     
 if __name__ == "__main__":
 
     #1,2,3
-    minimos = graficar_error(image, imagen_ruidosa, 'no')
+    minimos = graficar_error(image, imagen_ruidosa, 'si')
 
     valores_minimos = {"Minimo Global" : minimos[0],
                        "Minimo Exterior": minimos[1],
@@ -118,15 +127,19 @@ if __name__ == "__main__":
     
     #4,5
     imagen_global = filtro_gaussiano(imagen_ruidosa, valores_minimos["Minimo Global"])
-    #mostrar_imagen(imagen_global)
+    mostrar_imagen(imagen_global)
     sigma_a_probar = 2
     imagen_adaptativa, mapeo_sigma = filtro_gaussiano_adap(imagen_ruidosa, sigma_a_probar, valores_minimos, "no")
-    mostrar_imagen(imagen_adaptativa)
-    comparacion(image, imagen_adaptativa, valores_minimos)
-    #6
-    imagen_adaptativa_interpolada, mapeo_sigma_interpolada = filtro_gaussiano_adap(imagen_ruidosa, sigma_a_probar, valores_minimos, "si")
 
-    
+    graficar_mapeo(mapeo_sigma, "Discreto")
+
+    mostrar_imagen(imagen_adaptativa)
+    comparacion(image, imagen_global, imagen_adaptativa, valores_minimos)
+
+    #6
+    imagen_adaptativa_interpolada, mapeo_sigma_interpolado= filtro_gaussiano_adap(imagen_ruidosa, sigma_a_probar, valores_minimos, "si")
+    mostrar_imagen(imagen_adaptativa_interpolada)
+    graficar_mapeo(mapeo_sigma_interpolado, "Interpolado")
     
 
     
