@@ -12,7 +12,7 @@ def graficar_error(imagen_original, imagen_ruidosa, graficar: str):
     imagen_original = imagen_original.copy()
     imagen_ruidosa = imagen_ruidosa.copy()
 
-    lista = [round(i, 1) for i in np.linspace(0.0, 4.0, 21)]
+    lista = [round(i, 1) for i in np.linspace(0.0, 4.0, 100)]
         #valores de sigma
     valores = sorted(list(set(lista)))
     
@@ -58,10 +58,12 @@ def graficar_error(imagen_original, imagen_ruidosa, graficar: str):
     if graficar in ["Si", "si"]:
         plt.figure(figsize=(10, 6))
 
-        label_global = f'Global (minimo RMSE: {round(lista_error_global[minimo_global], 2)})'
-        label_r1 = f'Fondo (minimo RMSE: {round(lista_error_R1[minimo_R1], 2)})'
-        label_r2 = f'Cuadrado (minimo RMSE: {round(lista_error_R2[minimo_R2], 2)})'
-        label_r3 = f'Círculo (minimo RMSE: {round(lista_error_R3[minimo_R3], 2)})'
+        # Rectangulo = Cuadrado xd
+
+        label_global = f'Global (minimo RMSE: {round(lista_error_global[minimo_global], 2)} sigma = {valores[minimo_global]})'
+        label_r1 = f'Fondo (minimo RMSE: {round(lista_error_R1[minimo_R1], 2)} sigma = {valores[minimo_R1]})'
+        label_r2 = f'Cuadrado (minimo RMSE: {round(lista_error_R2[minimo_R2], 2)} sigma = {valores[minimo_R2]})'
+        label_r3 = f'Círculo (minimo RMSE: {round(lista_error_R3[minimo_R3], 2)} sigma = {valores[minimo_R3]})'
 
         # 2. Asignar las etiquetas al parámetro label de plt.plot()
         plt.plot(valores, lista_error_global, label=label_global, color='black', linestyle='--')
@@ -127,18 +129,18 @@ if __name__ == "__main__":
     
     #4,5
     imagen_global = filtro_gaussiano(imagen_ruidosa, valores_minimos["Minimo Global"])
-    mostrar_imagen(imagen_global)
-    sigma_a_probar = 2
+    mostrar_imagen(imagen_global, "imagen sigma global")
+    sigma_a_probar = minimos[0]
     imagen_adaptativa, mapeo_sigma = filtro_gaussiano_adap(imagen_ruidosa, sigma_a_probar, valores_minimos, "no")
 
     graficar_mapeo(mapeo_sigma, "Discreto")
 
-    mostrar_imagen(imagen_adaptativa)
+    mostrar_imagen(imagen_adaptativa, "imagen adaptativa")
     comparacion(image, imagen_global, imagen_adaptativa, valores_minimos)
 
     #6
     imagen_adaptativa_interpolada, mapeo_sigma_interpolado= filtro_gaussiano_adap(imagen_ruidosa, sigma_a_probar, valores_minimos, "si")
-    mostrar_imagen(imagen_adaptativa_interpolada)
+    mostrar_imagen(imagen_adaptativa_interpolada, "imagen adaptativa interpolada")
     graficar_mapeo(mapeo_sigma_interpolado, "Interpolado")
     
 

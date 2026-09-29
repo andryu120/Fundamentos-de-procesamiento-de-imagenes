@@ -54,7 +54,7 @@ def agregar_ruido_poisson(imagen, lam):
     imagen_ruidosa = imagen_ruidosa.astype(np.uint8)
     return imagen_ruidosa
 
-np.random.seed(20) #semilla aleatoria
+np.random.seed(42) #    semilla aleatoria
 
 imagen_ruidosa = agregar_ruido_poisson(image,40)
 

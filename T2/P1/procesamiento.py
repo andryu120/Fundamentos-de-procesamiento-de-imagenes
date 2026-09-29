@@ -5,11 +5,13 @@ from creacion_imagen import (mascara_circulo, mascara_exterior, mascara_rectangu
 
 #creacion imagen
 
-def mostrar_imagen(img: np.ndarray):
+def mostrar_imagen(img: np.ndarray, titulo: str):
     import matplotlib.pyplot as plt
     # # Si queremos mostrala
+    
     plt.figure(figsize=(15,8))
     plt.imshow(img, cmap='gray')
+    plt.title(f'{titulo}')
     plt.show()
 
 
@@ -47,7 +49,7 @@ def rmse(imagen_referencia: np.ndarray, imagen_estimada: np.ndarray) -> float:
     referencia = imagen_referencia.astype(np.float64)
     estimada = imagen_estimada.astype(np.float64)
     return float(np.sqrt(np.mean((referencia - estimada) ** 2)))
-
+    
 
 
 def filtro_gaussiano_adap(imagen, func_sigma,  valores_minimos: dict, interpolado: str):
