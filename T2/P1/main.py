@@ -116,10 +116,38 @@ def comparacion(imagen, imagen_filtrada_normal, imagen_adaptativa, valores_minim
     
     print(f"{'Global':<12} | {rmse_normal_global:<15.2f} | {rmse_adap_global:<15.2f}")
     
-def seleccionar_pixel():
+def seleccionar_pixel(imagen, mapeo_sigma, valores_minimos):
+
+    sigma = valores_minimos["Minimo Global"]
+
+    mu = filtro_gaussiano(imagen, sigma)
+
+    coords = {
+        'Fondo': (30,30),
+        'Cuadrado': (128,80),
+        'Circulo': (128,128),
+
+    }
+
+    for region, (y,x) in coords.items():
+        valor_mu = mu[y,x]
+        valor_sigma = mapeo_sigma[y,x]
+        tamano_kernel = 2 * int(np.ceil(2 * valor_sigma)) + 1
+
+        print(f"Pixel seleccionado en la region {region} con coordenadas: (y={y}, x={x}):")
+        print(f"  μ̂  = {valor_mu:.2f}")
+        print(f"  sigma asignado = {valor_sigma}")
+        print(f"  Kernel aplicado de {tamano_kernel}x{tamano_kernel} píxeles\n")
+
+
     pass
 
 if __name__ == "__main__":
+
+    #mostrar imagen original y con ruido
+
+    mostrar_imagen(image, "imagen original")
+    mostrar_imagen(imagen_ruidosa, "imagen ruidosa")
 
     #1,2,3
     minimos = graficar_error(image, imagen_ruidosa, 'si')
@@ -144,6 +172,11 @@ if __name__ == "__main__":
     imagen_adaptativa_interpolada, mapeo_sigma_interpolado= filtro_gaussiano_adap(imagen_ruidosa, sigma_a_probar, valores_minimos, "si")
     mostrar_imagen(imagen_adaptativa_interpolada, "imagen adaptativa interpolada")
     graficar_mapeo(mapeo_sigma_interpolado, "Interpolado")
+
+    #Pregunta guiada
+
+    seleccionar_pixel(imagen_ruidosa, mapeo_sigma, valores_minimos)
+
     
 
     
