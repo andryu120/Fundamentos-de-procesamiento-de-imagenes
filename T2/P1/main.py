@@ -116,7 +116,9 @@ def comparacion(imagen, imagen_filtrada_normal, imagen_adaptativa, valores_minim
     
     print(f"{'Global':<12} | {rmse_normal_global:<15.2f} | {rmse_adap_global:<15.2f}")
     
-    
+def seleccionar_pixel():
+    pass
+
 if __name__ == "__main__":
 
     #1,2,3
