@@ -1,10 +1,15 @@
 import numpy as np
 import cv2
-import scipy
-
+import scipy.ndimage as ndimage
 
 def difusion_anistropica(imagen, lambdda, num_iter, epsilon, K, modo):
     imagen = imagen.copy().astype(float)
+    # verificar estabilidad
+    # if modo == "variacion total":
+    #     assert lambdda <= epsilon/4
+    # elif modo in ["laplaciano", "laplaciano racional"]:
+    #     assert lambdda <= 1/4
+
 
     for iter in range(num_iter):
 
@@ -19,35 +24,30 @@ def difusion_anistropica(imagen, lambdda, num_iter, epsilon, K, modo):
         O = padding[1: -1, : -2] - imagen
 
         if modo == "variacion total":
-
-            # antes de continuar verificamos la estabilidad
-
-            if lambdda > epsilon/4:
-                lambdda = epsilon/4 - 0.01 # se reduce para que pueda correr
-                print(f"Se redujo lambda a {lambdda}")
-
+    
             cN, cS, cE , cO = variacion_total(N, S, E, O, epsilon)
 
         elif modo == "laplaciano":
-            # verificar estabilidad
-            if lambdda > 1/4:
-                lambdda = 1/4 - 0.01
-                print(f"Se redujo lambda a {lambdda}")
+            
 
-            cN, cS, cE , cO = laplaciano(N, S, E, O, K)
+
+            cN, cS, cE , cO = laplaciano(imagen, K)
 
         elif modo == "laplaciano racional":
-            if lambdda > 1/4:
-                lambdda = 1/4 - 0.01
-                print(f"Se redujo lambda a {lambdda}")
 
-            cN, cS, cE , cO = racional_laplaciano(N, S, E, O, K)
+            cN, cS, cE , cO = racional_laplaciano(imagen, K)
 
         # por ultimo se actualiza la imagen
 
         imagen = imagen + lambdda * (cN * N + cS * S + cE * E + cO * O)
 
-    return imagen
+        # se guarda el mapa de coef
+
+        if iter == (num_iter - 1):
+            mapa_c = (cN + cS + cE + cO) / 4.0
+
+
+    return imagen, mapa_c
 
 
 
@@ -60,8 +60,18 @@ def variacion_total(N, S, E, O, epsilon):
 
     return cN, cS, cE , cO
 
-def laplaciano(N, S, E, O, K):
-    laplaciano = N + S + E + O
+def laplaciano(img, K):
+    img = img.copy()
+    img_suavizada = ndimage.gaussian_filter(img, sigma=0.5)
+            
+    padded_suav = np.pad(img_suavizada, 1, mode='edge')
+    N_suav = padded_suav[:-2, 1:-1] - img_suavizada
+    S_suav = padded_suav[2:, 1:-1] - img_suavizada
+    E_suav = padded_suav[1:-1, 2:] - img_suavizada
+    O_suav = padded_suav[1:-1, :-2] - img_suavizada
+    
+    # Calculamos el Laplaciano discreto
+    laplaciano = N_suav + S_suav + E_suav + O_suav
             
     
     magnitud_laplace = np.abs(laplaciano)
@@ -72,13 +82,27 @@ def laplaciano(N, S, E, O, K):
 
     return cN , cS , cE , cW
 
-def racional_laplaciano(N, S, E, O, K):
-    laplaciano = N + S + E + O
+def racional_laplaciano(img,K):
+    # aplicamos un suavizado para evitar artefactos
+    img = img.copy()
+    img_suavizada = ndimage.gaussian_filter(img, sigma=0.5)
+            
+    padded_suav = np.pad(img_suavizada, 1, mode='edge')
+    N_suav = padded_suav[:-2, 1:-1] - img_suavizada
+    S_suav = padded_suav[2:, 1:-1] - img_suavizada
+    E_suav = padded_suav[1:-1, 2:] - img_suavizada
+    O_suav = padded_suav[1:-1, :-2] - img_suavizada
+    
+    # laplaciano discreto
+    laplaciano = N_suav + S_suav + E_suav + O_suav
+    
+    
     magnitud_laplace = np.abs(laplaciano)
-
-    potencia = 4 # se ocupa una potencia de 4 en vez de 2
+    
+    # funcion modificada
+    potencia = 4
     c_val = 1.0 / (1.0 + (magnitud_laplace / K)**potencia)
-
+    
     cN = cS = cE = cO = c_val
 
     return cN , cS , cE , cO
@@ -94,3 +118,15 @@ def mostrar_imagen(img: np.ndarray, titulo: str):
     plt.title(f'{titulo}')
     plt.show()
 
+
+def rmse(imagen_referencia: np.ndarray, imagen_estimada: np.ndarray) -> float:
+    """
+    Calcula el RMSE  entre una imagen de referencia y una imagen estimada.
+
+    Parámetros:
+        imagen_referencia : np.ndarray, imagen limpia (ground truth)
+        imagen_estimada    : np.ndarray, imagen filtrada a evaluar
+    """
+    referencia = imagen_referencia.astype(np.float64)
+    estimada = imagen_estimada.astype(np.float64)
+    return float(np.sqrt(np.mean((referencia - estimada) ** 2)))
