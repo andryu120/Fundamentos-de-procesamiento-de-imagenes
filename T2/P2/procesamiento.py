@@ -62,7 +62,7 @@ def variacion_total(N, S, E, O, epsilon):
 
 def laplaciano(img, K):
     img = img.copy()
-    img_suavizada = ndimage.gaussian_filter(img, sigma=0.5)
+    img_suavizada = ndimage.gaussian_filter(img, sigma=1.2)
             
     padded_suav = np.pad(img_suavizada, 1, mode='edge')
     N_suav = padded_suav[:-2, 1:-1] - img_suavizada
@@ -85,7 +85,7 @@ def laplaciano(img, K):
 def racional_laplaciano(img,K):
     # aplicamos un suavizado para evitar artefactos
     img = img.copy()
-    img_suavizada = ndimage.gaussian_filter(img, sigma=0.5)
+    img_suavizada = ndimage.gaussian_filter(img, sigma=1.2)
             
     padded_suav = np.pad(img_suavizada, 1, mode='edge')
     N_suav = padded_suav[:-2, 1:-1] - img_suavizada

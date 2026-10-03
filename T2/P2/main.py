@@ -74,13 +74,13 @@ if __name__ == "__main__":
     lap_iter = 40
 
     image = image / 255.0
-    print("Filtrando con Variación Total...")
+    
     img_tv, _ = difusion_anistropica(imagen_ruidosa, tv_lam, tv_iter, tv_ep, 0, "variacion total")
     
-    print("Filtrando con Laplaciano Exponencial...")
+    
     img_exp, _ = difusion_anistropica(imagen_ruidosa, lap_lam, lap_iter, 0, lap_k, "laplaciano")
     
-    print("Filtrando con Laplaciano Racional...")
+    
     img_rac, _ = difusion_anistropica(imagen_ruidosa, lap_lam, lap_iter, 0, lap_k, "laplaciano racional")
 
     # calculo rmse
@@ -89,11 +89,6 @@ if __name__ == "__main__":
     err_tv = rmse(image, img_tv)
     err_exp = rmse(image, img_exp)
     err_rac = rmse(image, img_rac)
-
-    print(f"RMSE Imagen Ruidosa: {err_ruido:.4f}")
-    print(f"RMSE Variacion Total: {err_tv:.4f}")
-    print(f"RMSE Lap. Exponencial: {err_exp:.4f}")
-    print(f"RMSE Lap. Racional: {err_rac:.4f}")
 
     # esto es para el crop
     y1, y2 = 100, 150
