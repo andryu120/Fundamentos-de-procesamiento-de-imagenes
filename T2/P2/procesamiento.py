@@ -25,7 +25,7 @@ def difusion_anistropica(imagen, lambdda, num_iter, epsilon, K, modo):
 
         if modo == "variacion total":
     
-            cN, cS, cE , cO = variacion_total(N, S, E, O, epsilon)
+            cN, cS, cE , cO = variacion_total(imagen, epsilon)
 
         elif modo == "laplaciano":
             
@@ -35,7 +35,7 @@ def difusion_anistropica(imagen, lambdda, num_iter, epsilon, K, modo):
 
         elif modo == "laplaciano racional":
 
-            cN, cS, cE , cO = racional_laplaciano(imagen, K)
+            cN, cS, cE , cO = gradiente_rac(imagen, K)
 
         # por ultimo se actualiza la imagen
 
@@ -51,12 +51,15 @@ def difusion_anistropica(imagen, lambdda, num_iter, epsilon, K, modo):
 
 
 
-def variacion_total(N, S, E, O, epsilon):
+def variacion_total(img, epsilon):
 
-    cN = 1.0 / np.sqrt(N**2 + epsilon**2)
-    cS = 1.0 / np.sqrt(S**2 + epsilon**2)
-    cE = 1.0 / np.sqrt(E**2 + epsilon**2)
-    cO = 1.0 / np.sqrt(O**2 + epsilon**2)
+    # calculo gradiente
+    dy, dx = np.gradient(img)
+    magnitud_gradiente = dx**2 + dy**2
+
+    c_val = 1.0 / np.sqrt(magnitud_gradiente + epsilon**2)
+   
+    cN =  cS = cE = cO = c_val
 
     return cN, cS, cE , cO
 
@@ -82,26 +85,21 @@ def laplaciano(img, K):
 
     return cN , cS , cE , cW
 
-def racional_laplaciano(img,K):
+def gradiente_rac(img,K):
     # aplicamos un suavizado para evitar artefactos
     img = img.copy()
-    img_suavizada = ndimage.gaussian_filter(img, sigma=1.2)
+    img_suavizada = ndimage.gaussian_filter(img, sigma=1.0)
             
-    padded_suav = np.pad(img_suavizada, 1, mode='edge')
-    N_suav = padded_suav[:-2, 1:-1] - img_suavizada
-    S_suav = padded_suav[2:, 1:-1] - img_suavizada
-    E_suav = padded_suav[1:-1, 2:] - img_suavizada
-    O_suav = padded_suav[1:-1, :-2] - img_suavizada
-    
-    # laplaciano discreto
-    laplaciano = N_suav + S_suav + E_suav + O_suav
+    dy , dx = np.gradient(img_suavizada)
+
+   
     
     
-    magnitud_laplace = np.abs(laplaciano)
+    magnitud_gradiente =  np.sqrt(dx**2 + dy**2)
     
     # funcion modificada
-    potencia = 4
-    c_val = 1.0 / (1.0 + (magnitud_laplace / K)**potencia)
+    potencia = 2
+    c_val = 1.0 / (1.0 + (magnitud_gradiente / K)**potencia)
     
     cN = cS = cE = cO = c_val
 
@@ -130,3 +128,4 @@ def rmse(imagen_referencia: np.ndarray, imagen_estimada: np.ndarray) -> float:
     referencia = imagen_referencia.astype(np.float64)
     estimada = imagen_estimada.astype(np.float64)
     return float(np.sqrt(np.mean((referencia - estimada) ** 2)))
+

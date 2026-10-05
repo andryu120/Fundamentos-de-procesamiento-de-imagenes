@@ -17,21 +17,20 @@ def graficar_mapa(map, titulo):
 
 if __name__ == "__main__":
 
-    #1
-    # epsilons = [1e-1, 1e-2, 1e-3, 1e-4]
+    # # 1
+    # parametros = [(0.1, 0.025,50), (0.05, 0.0125,80), (0.01, 0.0025,100), (0.0001, 2.5e-5 , 3000)]
+    
     # mostrar_imagen(imagen_ruidosa, "imagen ruidosa")
-    # for ep in epsilons: 
-    #     lam = ep / 5.0  # para que este dentro del rango
-    #     num_iters = int(1.0 / lam) # numero a probar que depende de lambda y epsilon
+    # for par in parametros: 
+        
 
-    #     imagen_mod_tv, mapa_c = difusion_anistropica(imagen_ruidosa, lam, num_iters, ep , 0, "variacion total")  # nose que poner en los parametros
-    #     mostrar_imagen(imagen_mod_tv, f"imagen con parametros lam = {lam}, iteraciones = {num_iters}, epsilon = {ep}")
-    #     graficar_mapa(mapa_c ,f"Mapa c parametros lam = {lam}, iteraciones = {num_iters}, epsilon = {ep}")
-
+    #     imagen_mod_tv, mapa_c = difusion_anistropica(imagen_ruidosa, par[1], par[2], par[0] , 0, "variacion total")  
+    #     mostrar_imagen(imagen_mod_tv, f"imagen con parametros lam = {par[1]}, iteraciones = {par[2]}, epsilon = {par[0]}")
+    #     graficar_mapa(mapa_c ,f"Mapa c parametros lam = {par[1]}, iteraciones = {par[2]}, epsilon = {par[0]}")
 
 
-    # 2 se podria hacer un diccionario con los valores a probar? maybe, estas estudiarlas y registrar los casos solicitados
 
+    # # 2 se podria hacer un diccionario con los valores a probar? 
     # casos_fallo = {
     #     "Lento": {"ep": 0.1, "lam": 0.001, "num_iter": 5}, 
     #     "Sobre-suavizado": {"ep": 0.5, "lam": 0.1, "num_iter": 200},
@@ -44,18 +43,18 @@ if __name__ == "__main__":
     #     mostrar_imagen(imagen_mod_tv, f"imagen con parametros lam = {parametros["lam"]}, iteraciones = {parametros["num_iter"]}, epsilon = {parametros["ep"]}")
 
 
-    # 3 probar los coeficientes propuestos junto a sus parametros, puede ser un for probando parametros
+    # # 3 probar los coeficientes propuestos junto a sus parametros, puede ser un for probandos parametros
 
-    for k in [0.01, 0.05, 0.1, 0.5]:
-        # con epsilon 0 y lambda 0.2, 30 repeticiones
-        print("laplaciano con exp")
-        img_mod_lap, mapa_c_lap = difusion_anistropica(imagen_ruidosa, 0.2, 30, 0, k, "laplaciano")
-        mostrar_imagen(img_mod_lap,f"imagen con parametros lam = {0.2}, iteraciones = {30}, epsilon = {0}, k = {k}" )
-        graficar_mapa(mapa_c_lap, f"Mapa c parametros lam = {0.2}, iteraciones = {30}, epsilon = {0}, k = {k}")
-        print("laplaciano con frac")
-        img_mod_lap_frac, mapa_c_lap_frac = difusion_anistropica(imagen_ruidosa, 0.2, 30, 0, k, "laplaciano racional")
-        mostrar_imagen(img_mod_lap,f"imagen con parametros lam = {0.2}, iteraciones = {30}, epsilon = {0}, k = {k}" )
-        graficar_mapa(mapa_c_lap_frac, f"Mapa c con parametros lam = {0.2}, iteraciones = {30}, epsilon = {0}, k = {k}")
+    # for k in [0.01, 0.05, 0.1, 0.5]:
+    #     # con epsilon 0 y lambda 0.2, 30 repeticiones
+    #     print("laplaciano con exp")
+    #     img_mod_lap, mapa_c_lap = difusion_anistropica(imagen_ruidosa, 0.2, 30, 0, k, "laplaciano")
+    #     mostrar_imagen(img_mod_lap,f"imagen con parametros lam = {0.2}, iteraciones = {30}, epsilon = {0}, k = {k}" )
+    #     graficar_mapa(mapa_c_lap, f"Mapa c parametros lam = {0.2}, iteraciones = {30}, epsilon = {0}, k = {k}")
+    #     print("laplaciano con frac")
+    #     img_mod_lap_frac, mapa_c_lap_frac = difusion_anistropica(imagen_ruidosa, 0.2, 30, 0, k, "laplaciano racional")
+    #     mostrar_imagen(img_mod_lap,f"imagen con parametros lam = {0.2}, iteraciones = {30}, epsilon = {0}, k = {k}" )
+    #     graficar_mapa(mapa_c_lap_frac, f"Mapa c con parametros lam = {0.2}, iteraciones = {30}, epsilon = {0}, k = {k}")
 
         
 
@@ -64,9 +63,9 @@ if __name__ == "__main__":
 
     # 5 comparar los tres metodos con los mismos parametros, tambien incluir RMSE respecto a la imagen original
     # Parametros a utilizar
-    tv_ep = 0.01
-    tv_lam = 0.002
-    tv_iter = 150
+    tv_ep = 0.0001
+    tv_lam = 2.5e-5
+    tv_iter = 3000
     
     
     lap_k = 0.05
@@ -81,26 +80,26 @@ if __name__ == "__main__":
     img_exp, _ = difusion_anistropica(imagen_ruidosa, lap_lam, lap_iter, 0, lap_k, "laplaciano")
     
     
-    img_rac, _ = difusion_anistropica(imagen_ruidosa, lap_lam, lap_iter, 0, lap_k, "laplaciano racional")
+    img_rac_grad, _ = difusion_anistropica(imagen_ruidosa, lap_lam, lap_iter, 0, lap_k, "laplaciano racional")
 
     # calculo rmse
     
     err_ruido = rmse(image, imagen_ruidosa)
     err_tv = rmse(image, img_tv)
     err_exp = rmse(image, img_exp)
-    err_rac = rmse(image, img_rac)
+    err_rac_grad = rmse(image, img_rac_grad)
 
-    # esto es para el crop
+    # esto es para el crop (recorte)
     y1, y2 = 100, 150
     x1, x2 = 45, 85 
 
-    imagenes = [image, imagen_ruidosa, img_tv, img_exp, img_rac]
+    imagenes = [image, imagen_ruidosa, img_tv, img_exp, img_rac_grad]
     titulos = [
         "Original", 
         f"Ruidosa\nRMSE: {err_ruido:.4f}", 
         f"TV (eps={tv_ep})\nRMSE: {err_tv:.4f}", 
         f"Lap. Exp (K={lap_k})\nRMSE: {err_exp:.4f}", 
-        f"Lap. Rac (K={lap_k})\nRMSE: {err_rac:.4f}"
+        f"Lap. Rac Grad (K={lap_k})\nRMSE: {err_rac_grad:.4f}"
     ]
 
     fig, axes = plt.subplots(2, 5, figsize=(18, 7))
