@@ -88,12 +88,10 @@ def laplaciano(img, K):
 def gradiente_rac(img,K):
     # aplicamos un suavizado para evitar artefactos
     img = img.copy()
-    img_suavizada = ndimage.gaussian_filter(img, sigma=1.0)
+    img_suavizada = ndimage.gaussian_filter(img, sigma=1.2)
             
     dy , dx = np.gradient(img_suavizada)
 
-   
-    
     
     magnitud_gradiente =  np.sqrt(dx**2 + dy**2)
     
