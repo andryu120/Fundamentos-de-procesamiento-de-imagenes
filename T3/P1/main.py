@@ -4,7 +4,8 @@ import scipy
 import matplotlib.pyplot as plt
 
 
-from procesamiento import (image, notch_filter, mostrar_imagen, espectro_log ,pick_peaks)
+from procesamiento import (image, notch_filter, mostrar_imagen, espectro_log, pick_points)
+
 
 
 def show_imgs(img_og, img_filt, fft_og, fft_filt, mascara):
@@ -50,52 +51,94 @@ def show_imgs(img_og, img_filt, fft_og, fft_filt, mascara):
 
 
 
-
+def comparar_bordes(diccionario_imagenes, size=80):
+    fig, axs = plt.subplots(1, len(diccionario_imagenes), figsize=(18, 5))
+    
+    for ax, (titulo, img) in zip(axs, diccionario_imagenes.items()):
+        # Recorte de la esquina superior izquierda para evidenciar artefactos de borde
+        recorte = img[0:size, 0:size]
+        
+        ax.imshow(recorte, cmap='gray', vmin=0, vmax=255)
+        ax.set_title(titulo)
+        ax.axis('off')
+        
+    plt.tight_layout()
+    plt.show()
 
 
 
 
 if __name__ == "__main__":
     imagen = image("cameraman.jpg")
+    imagen = image("cameraman.jpg")
     r, c = imagen.shape
     y, x = np.mgrid[0:r, 0:c]
-    imagen_ruidosa = imagen + 30*np.sin(2*np.pi*(0.10*x + 0.06*y)) + 20*np.sin(2*np.pi*(0.25*x - 0.18*y))
 
-    db = espectro_log(np.fft.fftshift(np.fft.fft2(imagen_ruidosa)))
+    imagen_ruidosa = imagen + 5*np.sin(2*np.pi*(0.10*x + 0.06*y)) + 5*np.sin(2*np.pi*(0.25*x - 0.18*y))
+    puntos = puntos = pick_points(imagen_ruidosa, 256, n=2)
+    
 
-    mostrar_imagen(db, "espectro original")
-    puntos = pick_peaks(imagen_ruidosa, 256, n=2)
+    #db = espectro_log(np.fft.fftshift(np.fft.fft2(imagen_ruidosa)))
+    #mostrar_imagen(db, "espectro original")
+    
 
     #2
-    for radio in [1, 6, 10, 15]:
+    # for radio in [1,2,4,6,10]:
 
-        print("Filtro ideal con radio",radio)
+    #     print("Filtro ideal con radio",radio)
 
-        img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, radio, 'edge', 256, "ideal", 4)
-        show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    #     img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'edge', 256, "ideal", 4)
+    #     show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
 
-        print("Filtro Gaussiano con radio",radio)
-        img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, radio, 'edge', 256, "gauss", 4)
-        show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    #     print("Filtro Gaussiano con radio",radio)
+    #     img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'reflect', 256, "gauss", 4)
+    #     show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
 
 
     
     # 3
     #Sin padding
-    radio = 6
+    radio = 5.5
     print("Analisis padding")
 
-    print("Filtro sin padding")
-    img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, radio, None, 0, "gauss", 4)
-    show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    comparacion_padding = {}
 
-    print("Filtro con padding 256")
-    img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, radio, 'edge', 256, "gauss", 4)
-    show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    # print("Filtro sin padding")
+    img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, None, 0, "gauss", 4)
+    # show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    comparacion_padding["Sin Padding"] = img_modificada
 
-    print("Filtro con padding 128")
-    img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, radio, 'edge', 128, "gauss", 4)
-    show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    # print("Filtro con padding 256")
+    img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'edge', 256, "gauss", 4)
+    # show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    comparacion_padding["Padding edge 256"] = img_modificada
+
+    # print("Filtro con padding 128")
+    img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'edge', 128, "gauss", 4)
+    #show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    comparacion_padding["Padding Edge 128"] = img_modificada
+
+    print("Filtro con padding (constant)")
+    img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'zeros', 256, "gauss", 4)
+    #show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    comparacion_padding["Padding constant"] = img_modificada
+
+    print("Filtro con padding (reflect) 256")
+    img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'reflect', 256, "gauss", 4)
+    #show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+    comparacion_padding["Padding reflect 256"] = img_modificada
+
+    #comparar_bordes(comparacion_padding)
+
+    diferencia_padding = np.abs(comparacion_padding["Sin Padding"] - comparacion_padding["Padding edge 256"])
+
+    plt.figure(figsize=(8,8))
+    # Amplificar el ruido
+    plt.imshow(diferencia_padding * 10, cmap='gray')
+    plt.axis('off')
+    plt.show()
+
+
 
     
 
