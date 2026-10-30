@@ -55,7 +55,7 @@ def pick_points(imagen, pad, n=2):
     
     
 
-def notch_filter(imagen,puntos, radio, mode, pad, tipo, numero_puntos):
+def notch_filter(imagen,puntos, radio, mode, pad, tipo):
     "Recibe una lista [(col_k, row_k)], el modo y la cantidad de zeros para el padding, ademas del tipo de filtro. Retorna la imagen modificada, el espectro original, el espectro modificado"
 
     rows, cols = imagen.shape
@@ -101,8 +101,15 @@ def notch_filter(imagen,puntos, radio, mode, pad, tipo, numero_puntos):
             notch_k = 1 - np.exp(-Dk / (2 * radio**2))
             notch_menos_k = 1 - np.exp(-D_menos_k / (2 * radio**2))
             mask_notch *= (notch_k * notch_menos_k)
-
-
+    # Para la pregunta guia
+    if i == 0:
+            idx_r, idx_c = int(row_k), int(col_k)
+            valor_original = f_shift[idx_r, idx_c]
+            valor_H = mask_notch[idx_r, idx_c]
+            print(f"F(u,v): {valor_original}")
+            print(f"H(u,v): {valor_H}")
+            print(f"Resultado: {valor_original * valor_H}")
+            
     new_fft = np.real(np.fft.ifft2(np.fft.ifftshift(f_shift * mask_notch)))[pad:pad+rows, pad:pad+cols]
 
     return new_fft, f_shift, f_shift * mask_notch, mask_notch

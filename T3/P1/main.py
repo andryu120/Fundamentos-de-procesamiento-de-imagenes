@@ -6,7 +6,57 @@ import matplotlib.pyplot as plt
 
 from procesamiento import (image, notch_filter, mostrar_imagen, espectro_log, pick_points)
 
+def mostrar_valores(imagen,puntos, radio, mode, pad):
+    "Recibe una lista [(col_k, row_k)], el modo y la cantidad de zeros para el padding, ademas del tipo de filtro. Retorna la imagen modificada, el espectro original, el espectro modificado"
 
+    rows, cols = imagen.shape
+
+    #aplicar o no padding
+
+    if mode == 'zeros':
+        img_padded = np.pad(imagen, pad, mode='constant', constant_values=0)
+    elif mode in ('reflect', 'edge'):
+        img_padded = np.pad(imagen, pad, mode=mode)
+    else:
+        pad = 0
+        img_padded = imagen.copy()
+        
+
+    
+    # Transformada de Fourier 
+    f_transform = np.fft.fft2(img_padded)
+    f_shift = np.fft.fftshift(f_transform)
+
+    # Coordenadas y matriz de distancia respecto al centro
+    padded_rows, padded_cols = img_padded.shape
+    crow, ccol = padded_rows // 2, padded_cols // 2
+
+    mask_notch = np.ones((padded_rows, padded_cols))
+
+    U, V = np.indices((padded_rows, padded_cols))
+
+    
+    fx, fy = puntos[0]
+    col_k = ccol + fx * padded_cols
+    row_k = crow + fy * padded_rows
+    col_k_ , row_k_ = (2*ccol - col_k, 2*crow - row_k)
+
+    Dk = ((U - row_k)**2 + (V - col_k)**2)
+    D_menos_k = ((U - row_k_)**2 + (V - col_k_)**2)
+
+    mask_notch[np.sqrt(Dk) <= radio] = 0
+    mask_notch[np.sqrt(D_menos_k) <= radio] = 0
+
+    
+    idx_row, idx_col = int(row_k), int(col_k)
+    
+    valor_original = f_shift[idx_row, idx_col]
+    valor_H = mask_notch[idx_row, idx_col]
+    print(f'Frecuencias: {col_k,row_k}')
+    print(f"F(u,v): {valor_original}")
+    print(f"H(u,v): {valor_H}")
+    print(f"Resultado: {valor_original * valor_H}")
+            
 
 def show_imgs(img_og, img_filt, fft_og, fft_filt, mascara):
 
@@ -55,7 +105,7 @@ def comparar_bordes(diccionario_imagenes, size=80):
     fig, axs = plt.subplots(1, len(diccionario_imagenes), figsize=(18, 5))
     
     for ax, (titulo, img) in zip(axs, diccionario_imagenes.items()):
-        # Recorte de la esquina superior izquierda para evidenciar artefactos de borde
+        
         recorte = img[0:size, 0:size]
         
         ax.imshow(recorte, cmap='gray', vmin=0, vmax=255)
@@ -83,16 +133,16 @@ if __name__ == "__main__":
     
 
     #2
-    # for radio in [1,2,4,6,10]:
+    for radio in [1]:
 
-    #     print("Filtro ideal con radio",radio)
+        print("Filtro ideal con radio",radio)
 
-    #     img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'edge', 256, "ideal", 4)
-    #     show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+        img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'edge', 256, "ideal", 4)
+        show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
 
-    #     print("Filtro Gaussiano con radio",radio)
-    #     img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'reflect', 256, "gauss", 4)
-    #     show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
+        print("Filtro Gaussiano con radio",radio)
+        img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'reflect', 256, "gauss", 4)
+        show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
 
 
     
@@ -132,11 +182,14 @@ if __name__ == "__main__":
 
     diferencia_padding = np.abs(comparacion_padding["Sin Padding"] - comparacion_padding["Padding edge 256"])
 
-    plt.figure(figsize=(8,8))
-    # Amplificar el ruido
-    plt.imshow(diferencia_padding * 10, cmap='gray')
-    plt.axis('off')
-    plt.show()
+    # plt.figure(figsize=(8,8))
+    # # Amplificar el ruido
+    # plt.imshow(diferencia_padding * 10, cmap='gray')
+    # plt.axis('off')
+    # plt.show()
+
+    # Para pregunta guia
+    mostrar_valores(imagen_ruidosa,puntos, radio, 'edge', 256)
 
 
 
