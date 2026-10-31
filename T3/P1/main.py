@@ -158,7 +158,7 @@ if __name__ == "__main__":
     show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
     comparacion_padding["Sin Padding"] = img_modificada
 
-    # print("Filtro con padding 256")
+    print("Filtro con padding 256")
     img_modificada, fft_og, fft_modificada, mascara = notch_filter(imagen_ruidosa, puntos, radio, 'edge', 256, "gauss", 4)
     show_imgs(imagen_ruidosa, img_modificada, fft_og, fft_modificada, mascara)
     comparacion_padding["Padding edge 256"] = img_modificada
