@@ -9,7 +9,11 @@ Este repositorio contiene las tareas del curso IEE2714. Dentro de cada carpeta s
     * `Pregunta_3/`: Implementación de Reescalado e Interpolación.
 
 * `T2`:
-    * `Pregunta_1/`: Ruido Poisson y filtrado Gaussiano adaptativo
+    * `Pregunta_1/`: Ruido Poisson y filtrado Gaussiano adaptativo.
     * `Pregunta_2/`: Implementación de Ecualización Local.
+
+* `T3`:
+    * `Pregunta_1/`: Eliminación de ruido periódico mediante filtrado notch.
+    * `Pregunta_2/`: Deconvolución de Wiener y Tikhonov iterativo
 
 

@@ -10,48 +10,48 @@ from   scipy.signal.windows import tukey
 from procesamiento import (rmse)
 
 
-def Hx(x, H):
-    Hx = np.real(ifft2(fft2(x, axes=(0,1)) * H, axes=(0,1)))
+
+def tikhonov(img_degradada, H, lambbda, tau, max_iter, tolerancia, img_og):
     
-    return Hx
 
-def Hx_t(x, H):
-    Hx_t = np.real(ifft2(fft2(x, axes=(0,1)) * np.conjugate(H), axes=(0,1)))
-    return Hx_t
-
-def tikhonov(img_degradada, H, lambbda, tau, iter, tolerancia, img_og):
-    x = img_degradada.copy()
+    rows, cols, ch = img_degradada.shape
+    N = rows * cols
+    Y  = fft2(img_degradada,      axes=(0, 1))
+    Xt = fft2(img_og, axes=(0, 1))
+    X = np.zeros_like(Y)
 
     errores = []
     costos = []
-    x_best, e_best = x.copy(), np.inf
+    x_best, e_best = X.copy(), np.inf
 
-    for i in range(iter):
+    for i in range(max_iter):
 
 
-        residual = Hx(x, H) - img_degradada
-        grad = Hx_t(residual, H) + lambbda * x # gradiente
-        x_act = x - tau * grad
-        func_costo = 0.5*np.sum((Hx(x, H) - img_degradada)**2) + 0.5*lambbda*np.sum(x**2)
+        residual = H * X - Y
+        grad = np.conj(H) * residual + lambbda * X # gradiente
+        X_act = X - tau * grad
+        func_costo = (0.5*np.sum(np.abs(residual)**2) + 0.5*lambbda*np.sum(np.abs(X)**2)) / N
         costos.append(func_costo)
-        errores.append(rmse(x, img_og))
+        errores.append(np.sqrt(np.sum(np.abs(X - Xt)**2) / (N * N * ch)))
 
         if errores[-1] < e_best: 
                                  
-            e_best, x_best = errores[-1], x.copy() # recordar el mejor error
+            e_best, x_best = errores[-1], X.copy() # recordar el mejor error
 
         
-        if not np.isfinite(costos[-1]) or costos[-1] > 1e12:   # divergence guard
+        if not np.isfinite(costos[-1]) or costos[-1] > 1e8:   # divergence guard
             break
 
         # para parar se analiza el cambio relativo entre cada iteracion, si supera cierto
-        relative_change = np.linalg.norm(x_act - x) / (np.linalg.norm(x) + 1e-12) # para evitar dividir por 0
+        relative_change = np.linalg.norm(X_act - X) / (np.linalg.norm(X) + 1e-12) # para evitar dividir por 0
         if relative_change < tolerancia:
-            x = x_act
+            X = X_act
             break
-        x = x_act
+        X = X_act
 
-    return x, errores, costos, x_best
+    a_img = lambda Z: np.real(ifft2(Z, axes=(0, 1)))
+
+    return a_img(X), np.array(costos), np.array(errores), a_img(x_best)
 
  
 
