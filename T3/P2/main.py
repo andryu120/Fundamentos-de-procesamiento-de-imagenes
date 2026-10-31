@@ -25,8 +25,10 @@ def graficar_error(img_original, psf):
     for s in sigmas:
         y, H = degradar(img_original, psf, s)
         errs = [rmse(wiener(y, H, K), img_original) for K in Ks]
+
         mejor_k[s] = Ks[int(np.argmin(errs))]
         plt.loglog(Ks, errs, label=f"sigma={s}  (mejor K={mejor_k[s]:.1e})")
+        
     plt.xlabel("K"); plt.ylabel("RMSE"); plt.legend(); plt.show()
     return mejor_k
 
@@ -69,7 +71,7 @@ if __name__ == "__main__":
 
     # 1
 
-    # graficar_error(rgb, psf)
+    # mejor_k = graficar_error(rgb, psf)
 
     mejor_k = {0.01: 7.0e-03,
                  0.05: 4.1e-02} # sigma: K
@@ -78,95 +80,101 @@ if __name__ == "__main__":
         y, H = degradar(rgb, psf, sigma)
         f = wiener(y, H, K)
         recortes(rgb, f)
+
         mostrar_imagen(f, "modificada")
 
-    2
+    #2
     psf_erronea = gaussian_filter(psf, sigma=(0.8, 0.8, 0) if psf.ndim == 3 else 0.5)
     psf_erronea /= psf_erronea.sum(axis=(0, 1), keepdims=True)
 
     
 
-    # for sigma, K in mejor_k.items():
-    #         if sigma == 0.05:
-    #              break
-    #         y, H = degradar(rgb, psf, sigma)             
-    #         H_erronea = centrar_psf(psf_erronea, rgb)        
+    for sigma, K in mejor_k.items():
+            if sigma == 0.05:
+                 break
+            y, H = degradar(rgb, psf, sigma)             
+            H_erronea = centrar_psf(psf_erronea, rgb)        
 
-    #         f = wiener(y, H, K)
-    #         f_erronea = wiener(y, H_erronea, K)
-    #         print(rmse(f, rgb), rmse(f_erronea, rgb))
-    #         recortes(rgb, f_erronea)
+            f = wiener(y, H, K)
+            f_erronea = wiener(y, H_erronea, K)
+            print(rmse(f, rgb), rmse(f_erronea, rgb))
+            recortes(rgb, f_erronea)
 
 
-    # Parte B
+    #Parte B
 
-    # 3
+    #3
 
-    # # Recortar la imagen para facilitar el computo
-    # x = rgb[1500:2012, 1700:2212]
-    # y, H = degradar(x, psf, 0.01)
-    # Ks = np.logspace(-6, 0, 40)
-    # K = Ks[np.argmin([rmse(wiener(y, H, k), x) for k in Ks])]
+    # Recortar la imagen para facilitar el computo
+    x = rgb[1500:2012, 1700:2212]
+    y, H = degradar(x, psf, 0.01)
+    Ks = np.logspace(-6, 0, 40)
+    K = Ks[np.argmin([rmse(wiener(y, H, k), x) for k in Ks])]
     
 
-    # resultados = {}
-    # sigma = 0.01                             
-    # y, H = degradar(x, psf, sigma)
+    resultados = {}
+    sigma = 0.01                             
+    y, H = degradar(x, psf, sigma)
 
-    # for lam in [0, K, K/10, 10*K]:
-    #     for tau in [1.0 ,1.8/(1+lam), 2.1/(1+lam)]:
-    #         xk, c, e, _ = tikhonov(y, H, lam, tau, 2000, 0, x)
-    #         resultados[(lam, tau)] = (xk, c, e)
+    for lam in [0, K, K/10, 10*K]:
+        for tau in [1.0 ,1.8/(1+lam), 2.1/(1+lam)]:
+            
+            xk, c, e, _ = tikhonov(y, H, lam, tau, 2000, 0, x)
+            resultados[(lam, tau)] = (xk, c, e)
 
-    # # graficar costo vs rmse
+    # graficar costo vs rmse
 
-    # lams = sorted({lam for lam, _ in resultados})
-    # estilos = ['-', '--', ':']
-    # fig, ax = plt.subplots(2, len(lams), figsize=(18, 7), sharey='row')
+    lams = sorted({lam for lam, _ in resultados})
 
-    # for j, lam in enumerate(lams):
-    #     taus = sorted(t for l, t in resultados if l == lam)
-    #     for t, ls in zip(taus, estilos):
-    #         xk, c, e = resultados[(lam, t)]
-    #         ax[0, j].semilogy(c, ls, label=f"τ={t:.2f}")
-    #         ax[1, j].semilogy(e, ls)
-    #     ax[0, j].set_title(f"λ={lam:.1e}")
-    #     ax[1, j].set_xlabel("iteración")
-    #     ax[0, j].legend(fontsize=8)
+    estilos = ['-', '--', ':']
+    fig, ax = plt.subplots(2, len(lams), figsize=(18, 7), sharey='row')
 
-    # ax[0, 0].set_ylabel("Costo J(x_k)")
-    # ax[1, 0].set_ylabel("RMSE(x_k, x)")
+    for j, lam in enumerate(lams):
+        taus = sorted(t for l, t in resultados if l == lam)
+        for t, ls in zip(taus, estilos):
+
+            xk, c, e = resultados[(lam, t)]
+            ax[0, j].semilogy(c, ls, label=f"τ={t:.2f}")
+            ax[1, j].semilogy(e, ls)
+
+        ax[0, j].set_title(f"λ={lam:.1e}")
+        ax[1, j].set_xlabel("iteración")
+        ax[0, j].legend(fontsize=8)
+
+    ax[0, 0].set_ylabel("Costo J(x_k)")
+    ax[1, 0].set_ylabel("RMSE(x_k, x)")
 
     
-    # ax[0, 0].set_ylim(10, 1e4)
+    ax[0, 0].set_ylim(10, 1e4)
     
-    # ax[1, 0].set_ylim(1e-2, 1e1)
+    ax[1, 0].set_ylim(1e-2, 1e1)
 
-    # plt.suptitle(f"σ={sigma}, crop 512×512, K*={K:.1e}")
-    # plt.tight_layout(); plt.show()
-    # # ver que pasa con la tolerancia
+    plt.suptitle(f"σ={sigma}, crop 512×512, K*={K:.1e}")
+    plt.tight_layout(); plt.show()
 
-    # # for tol in [1e-3, 1e-4, 1e-5, 1e-6, 0]:
-    # #     xk, c, e, _ = tikhonov(y, H, K, 1.0, 5000, tol, x)
-    # #     print(f"tol={tol:.0e}  iters={len(e)}  RMSE={rmse(xk, x):.5f}")
+    # ver que pasa con la tolerancia
 
-    # # 4
+    for tol in [1e-3, 1e-4, 1e-5, 1e-6, 0]:
+        xk, c, e, _ = tikhonov(y, H, K, 1.0, 5000, tol, x)
+        print(f"tol={tol:.0e}  iters={len(e)}  RMSE={rmse(xk, x):.5f}")
 
-    # # λ = K
-    # x_wk = wiener(y, H, K)                                   
-    # x_tk, c1, e1,  x_tk_best = tikhonov(y, H, K, 1.0, 6000, 1e-9, x)
+    # 4
 
-    # # λ = 0
-    # x_inv = wiener(y, H, 1e-12)                                  
-    # x_t0, c0, e0, x_t0_best = tikhonov(y, H, 0.0, 1.0, 3000, 0, x)
+    # λ = K
+    x_wk = wiener(y, H, K)                                   
+    x_tk, c1, e1,  x_tk_best = tikhonov(y, H, K, 1.0, 6000, 1e-9, x)
 
-    # print(f"{'caso':<12}{'rmse cerrada':>14}{'rmse iter. optima':>20}{'iter optima':>13}")
-    # print(f"{'λ = K*':<12}{rmse(x_wk,x):14.5f}{rmse(x_tk_best,x):20.5f}{e1.argmin():13d}")
-    # print(f"{'λ = 0':<12}{rmse(x_inv,x):14.5f}{rmse(x_t0_best, x):20.5f}{e0.argmin():13d}")
-    # print("error relativo entre ambos casos: ", np.linalg.norm(x_tk-x_wk)/np.linalg.norm(x_wk))
+    # λ = 0
+    x_inv = wiener(y, H, 1e-12)                                  
+    x_t0, c0, e0, x_t0_best = tikhonov(y, H, 0.0, 1.0, 3000, 0, x)
 
-    # comparar(x, y, x_wk,  x_tk, f"λ = K* = {K:.1e}, σ={sigma}, τ=1.0, crop 512×512")
-    # comparar(x, y, x_inv, x_t0_best, f"λ = 0, σ={sigma}, τ=1.0, parada en iter {e0.argmin()}, crop 512×512")
+    print(f"{'caso':<12}{'rmse cerrada':>14}{'rmse iter. optima':>20}{'iter optima':>13}")
+    print(f"{'λ = K*':<12}{rmse(x_wk,x):14.5f}{rmse(x_tk_best,x):20.5f}{e1.argmin():13d}")
+    print(f"{'λ = 0':<12}{rmse(x_inv,x):14.5f}{rmse(x_t0_best, x):20.5f}{e0.argmin():13d}")
+    print("error relativo entre ambos casos: ", np.linalg.norm(x_tk-x_wk)/np.linalg.norm(x_wk))
+
+    comparar(x, y, x_wk,  x_tk, f"λ = K* = {K:.1e}, σ={sigma}, τ=1.0, crop 512×512")
+    comparar(x, y, x_inv, x_t0_best, f"λ = 0, σ={sigma}, τ=1.0, parada en iter {e0.argmin()}, crop 512×512")
 
 
     
