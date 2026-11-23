@@ -42,21 +42,14 @@ def reescalar(g, p_bajo=0.5, p_alto=99.5):
 
 
 def por_canal(img, metodo: str):
-    r = img.copy()
-    r[:,:,0] = r[:,:,1] = 0
-
-    g = img.copy()
-    g[:,:,0] = g[:,:,2] = 0
-
-    b = img.copy()
-    b[:,:,1] = b[:,:,2] = 0
-
+    # Verificar si se trabaja en RGB o BGR
     salida = []
 
-    for canal in [r,g,b]:
+    for c in range(3):
+        C = np.ascontiguousarray(E[..., c])
         if metodo == "homomorfico":
-            salida.append(homomorfico_hdr(canal))
+            salida.append(homomorfico_hdr(C))
         elif metodo == "durand":
-            salida.append(durand(canal))
+            salida.append(durand(C))
 
-    np.clip(np.stack(salida, axis=-1), 0.0, 1.0) # normalizado a [0,1]
+    return np.clip(np.stack(salida, axis=-1), 0.0, 1.0) # normalizado a [0,1]
