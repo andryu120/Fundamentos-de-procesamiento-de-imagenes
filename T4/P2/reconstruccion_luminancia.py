@@ -5,12 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import skimage
 from   scipy.fft  import fft2, ifft2, fftshift, ifftshift, dctn, idctn
-from procesamiento import (luminancia, recolorear, reescalar, a_pantalla)
+from utils import (luminancia, recolorear, reescalar, a_pantalla)
 from durand import durand
 from homorfico import homomorfico_hdr
 
 
-def re_lum(E, metodo, beta, epsilon = 0.01): # luminancia procesada, imagen
+def re_lum(E, metodo, beta, epsilon = 1e-4): # luminancia procesada, imagen
 
     if metodo == "homomorfico":
         Y, L_out = homomorfico_hdr(E)

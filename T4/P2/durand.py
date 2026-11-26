@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import skimage
 from   scipy.fft  import fft2, ifft2, fftshift, ifftshift, dctn, idctn
-from procesamiento import (luminancia, recolorear, reescalar, a_pantalla)
+from utils import (luminancia, recolorear, reescalar, a_pantalla)
 
 
 def durand(E, sigma_s=None, sigma_r=0.4, contraste=30, s=0.6, filtro='bilateral'):

@@ -5,11 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import skimage
 from   scipy.fft  import fft2, ifft2, fftshift, ifftshift, dctn, idctn
-from homorfico import homomorfico_hdr
+from homorfico import homomorfico_hdr, filtro_homomorfico
 from durand import durand
+from utils import (reescalar, luminancia)
 
 
-def cargar_rgb(path):
+def cargar_rgb(path):   
     """
     Carga una imagen HDR y devuelve RGB lineal float32 normalizado por su máximo.
     cv2 entrega BGR, por eso se invierte el orden de canales: luminancia()
@@ -20,25 +21,36 @@ def cargar_rgb(path):
     return rgb / rgb.max()
 
 
-def luminancia(E):
-    # Fila Y de la matriz RGB -> XYZ usada en la cápsula de espacios de color
-    return 0.177 * E[..., 0] + 0.813 * E[..., 1] + 0.011 * E[..., 2]
+# funciones especificas para por_canal
+
+def homomorfico_2d(X, gamma_H=1.5, gamma_L=0.25, D0=40, c=1.0):
+    
+    return reescalar(filtro_homomorfico(X, gamma_H, gamma_L, D0, c), 0.5, 99)
+
+def homomorfico_hdr(E, **kw):
+    Y = luminancia(E)
+    return Y, homomorfico_2d(Y, **kw)
 
 
-def a_pantalla(x, gamma=2.2):
-    # Corrección gamma para desplegar una imagen lineal en [0, 1]
-    return np.clip(x, 0.0, 1.0) ** (1.0 / gamma)
+def durand_2d(E, sigma_s=None, sigma_r=0.4, contraste=30, s=0.6, filtro='bilateral'):
+    Y = luminancia(E)
+    logY = np.log10(Y + 1e-12).astype(np.float32)
+    if sigma_s is None:
+        sigma_s = 0.02 * max(Y.shape)                         # 2% del tamaño de la imagen
 
+    if filtro == 'bilateral':
+        base = cv2.bilateralFilter(logY, d=-1, sigmaColor=sigma_r, sigmaSpace=sigma_s)
+    else:
+        base = cv2.GaussianBlur(logY, (0, 0), sigma_s)
+    detalle = logY - base
 
-def recolorear(E, L_in, L_out, s=0.6):
-    # C_out = (C_in / L_in)^s · L_out, para cada canal C = R, G, B
-    return np.clip((E / (L_in[..., None] + 1e-12)) ** s * L_out[..., None], 0.0, 1.0)
+    k = np.log10(contraste) / (base.max() - base.min())
+    L_out = 10 ** (k * (base - base.max()) + detalle)
+    return np.clip(L_out, 0.0, 1.0)
 
-
-def reescalar(g, p_bajo=0.5, p_alto=99.5):
-    # Lleva los percentiles p_bajo y p_alto a 0 y 1, recortando los extremos
-    lo, hi = np.percentile(g, [p_bajo, p_alto])
-    return np.clip((g - lo) / (hi - lo), 0.0, 1.0)
+def durand(E, **kw): #?
+    Y = luminancia(E)
+    return Y, durand_2d(Y, **kw)
 
 
 def por_canal(img, metodo: str):
@@ -46,10 +58,10 @@ def por_canal(img, metodo: str):
     salida = []
 
     for c in range(3):
-        C = np.ascontiguousarray(E[..., c])
+        C = np.ascontiguousarray(img[..., c])
         if metodo == "homomorfico":
-            salida.append(homomorfico_hdr(C))
+            salida.append(homomorfico_2d(C))
         elif metodo == "durand":
-            salida.append(durand(C))
+            salida.append(durand_2d(C))
 
     return np.clip(np.stack(salida, axis=-1), 0.0, 1.0) # normalizado a [0,1]
