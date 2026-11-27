@@ -10,12 +10,7 @@ from durand import durand
 from homorfico import homomorfico_hdr
 
 
-def re_lum(E, metodo, beta, epsilon = 1e-4): # luminancia procesada, imagen
-
-    if metodo == "homomorfico":
-        Y, L_out = homomorfico_hdr(E)
-    elif metodo == "durand":
-        Y, L_out = durand(E)
+def re_lum(E, Y, L_out, beta, epsilon = 1e-4): # luminancia procesada, imagen
         
 
     salida = []
