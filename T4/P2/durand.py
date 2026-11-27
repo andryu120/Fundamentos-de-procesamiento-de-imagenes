@@ -22,4 +22,4 @@ def durand(E, sigma_s=None, sigma_r=0.4, contraste=30, s=0.6, filtro='bilateral'
 
     k = np.log10(contraste) / (base.max() - base.min())
     L_out = 10 ** (k * (base - base.max()) + detalle)
-    return Y, L_out
+    return Y, np.clip(L_out, 0.0, 1.0)

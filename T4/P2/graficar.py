@@ -11,7 +11,7 @@ import matplotlib.patches as patches
 
 
 
-def mostrar(imgs, titulos, cmap='gray', ncols=None, size=4, vmin=None, vmax=None, marco=False):
+def mostrar(imgs, titulos, cmap='gray', ncols=None, size=4, vmin=None, vmax=None, marco=False, suptitulo=None):
     # Muestra una lista de imágenes lado a lado; cmap puede ser uno o una lista
     n = len(imgs)
     ncols = ncols or n
@@ -29,6 +29,8 @@ def mostrar(imgs, titulos, cmap='gray', ncols=None, size=4, vmin=None, vmax=None
             ax.set_yticks([])
         else:
             ax.axis('off')
+    if suptitulo:
+        fig.suptitle(suptitulo, fontsize=10)
     plt.tight_layout()
     plt.show()
 

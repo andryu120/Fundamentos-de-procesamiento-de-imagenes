@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import skimage
 from   scipy.fft  import fft2, ifft2, fftshift, ifftshift, dctn, idctn
-from homorfico import homomorfico_hdr, filtro_homomorfico
 from durand import durand
 from utils import (reescalar)
 
@@ -48,16 +47,16 @@ def filtro_homomorfico(f, gamma_H=1.5, gamma_L=0.5, D0=30, c=1.0, eps=1e-6):
 
 def homomorfico_hdr(E, gamma_H=1.5, gamma_L=0.25, D0=40, c=1.0, s=0.6):
     Y = luminancia(E)
-    L_out = reescalar(filtro_homomorfico(Y, gamma_H, gamma_L, D0, c), 0.5, 99)
+    L_out = reescalar(filtro_homomorfico(E, gamma_H, gamma_L, D0, c), 0.5, 99)
     return L_out
 
 
 
 def durand_2d(E, sigma_s=None, sigma_r=0.4, contraste=30, s=0.6, filtro='bilateral'):
-    Y = luminancia(E)
-    logY = np.log10(Y + 1e-12).astype(np.float32)
+    
+    logY = np.log10(E + 1e-12).astype(np.float32)
     if sigma_s is None:
-        sigma_s = 0.02 * max(Y.shape)                         # 2% del tamaño de la imagen
+        sigma_s = 0.02 * max(E.shape)                         # 2% del tamaño de la imagen
 
     if filtro == 'bilateral':
         base = cv2.bilateralFilter(logY, d=-1, sigmaColor=sigma_r, sigmaSpace=sigma_s)
@@ -81,9 +80,8 @@ def por_canal(img, metodo: str):
         C = np.ascontiguousarray(img[..., c])
         if metodo == "homorfico":
 
-            salida.append(filtro_homomorfico(C))
+            salida.append(homomorfico_hdr(C))
         elif metodo == "durand":
             salida.append(durand_2d(C))
         
-
     return np.clip(np.stack(salida, axis=-1), 0.0, 1.0) # normalizado a [0,1]
