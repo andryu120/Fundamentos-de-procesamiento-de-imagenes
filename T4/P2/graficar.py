@@ -17,10 +17,13 @@ def mostrar(imgs, titulos, cmap='gray', ncols=None, size=4, vmin=None, vmax=None
     ncols = ncols or n
     nrows = int(np.ceil(n / ncols))
     cmaps = cmap if isinstance(cmap, list) else [cmap] * n
+    
 
     fig, axes = plt.subplots(nrows, ncols, figsize=(size * ncols, size * nrows))
     axes = np.atleast_1d(axes).ravel()
+    
     for ax, img, titulo, cm in zip(axes, imgs, titulos, cmaps):
+        
         ax.imshow(img, cmap=cm, vmin=vmin, vmax=vmax)
         ax.set_title(titulo)
     for ax in axes:
@@ -31,6 +34,7 @@ def mostrar(imgs, titulos, cmap='gray', ncols=None, size=4, vmin=None, vmax=None
             ax.axis('off')
     if suptitulo:
         fig.suptitle(suptitulo, fontsize=10)
+    
     plt.tight_layout()
     plt.show()
 
@@ -70,15 +74,3 @@ def recortar(img, caja):
     return img[y0:y1, x0:x1]
 
 
-def mostrar_cajas(img, cajas, titulo="Recortes elegidos"):
-    # Imagen completa con los rectángulos marcados (útil para el informe)
-    fig, ax = plt.subplots(figsize=(6, 6))
-    ax.imshow(img)
-    for nombre, (y0, y1, x0, x1) in cajas.items():
-        ax.add_patch(patches.Rectangle((x0, y0), x1 - x0, y1 - y0,
-                                       fill=False, edgecolor="red", linewidth=2))
-        ax.text(x0, y0 - 5, nombre, color="red", fontsize=9)
-    ax.set_title(titulo)
-    ax.axis("off")
-    plt.tight_layout()
-    plt.show()

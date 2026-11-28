@@ -5,21 +5,17 @@ from matplotlib.patches import Rectangle
 
 
 
-def mostrar(img1, img2, titulos=("Imagen 1", "Imagen 2"), gamma=False):
-    """
-    Muestra dos imágenes de luminancia [0,1] lado a lado (sin guardar).
-    gamma=True aplica la curva sRGB solo para visualizar (recomendado si
-    los datos son lineales, si no se ven casi negros).
-    """
+def mostrar(img1, img2, titulos=("Imagen 1", "Imagen 2"), gamma=False,
+            rango=(0, 1), cmap="gray"):
     def _vis(Y):
-        Y = np.clip(Y, 0, 1)
+        Y = np.clip(Y, *rango)          # <- antes: np.clip(Y, 0, 1)
         if gamma:
             Y = np.where(Y <= 0.0031308, Y * 12.92, 1.055 * Y ** (1 / 2.4) - 0.055)
         return Y
 
     fig, ax = plt.subplots(1, 2, figsize=(12, 6))
     for a, im, t in zip(ax, (img1, img2), titulos):
-        a.imshow(_vis(im), cmap="gray", vmin=0, vmax=1)
+        a.imshow(_vis(im), cmap=cmap, vmin=rango[0], vmax=rango[1])  # <- antes: vmin=0, vmax=1
         a.set_title(t)
         a.axis("off")
     plt.tight_layout()
@@ -29,15 +25,10 @@ def mostrar(img1, img2, titulos=("Imagen 1", "Imagen 2"), gamma=False):
 
 
 
-def mostrar_lista(imgs, n=None, ncols=4, titulo="Nivel", gamma=False, figsize_por_img=4):
-    """
-    Muestra las primeras n imágenes de una lista, indicando sus dimensiones.
-    imgs: lista de arrays 2D con luminancia en [0,1]
-    n: cuántas mostrar (None = todas)
-    gamma: aplica la curva sRGB solo para visualizar datos lineales
-    """
-    def _vis(Y):
-        Y = np.clip(Y, 0, 1)
+def mostrar_lista(imgs, n=None, ncols=3, titulo="Nivel", gamma=False,
+                  figsize_por_img=4, rango=(0, 1), titulos=None):
+    def _vis(Y, r):
+        Y = np.clip(Y, *r)              # <- antes: np.clip(Y, 0, 1)
         if gamma:
             Y = np.where(Y <= 0.0031308, Y * 12.92, 1.055 * Y ** (1 / 2.4) - 0.055)
         return Y
@@ -52,9 +43,11 @@ def mostrar_lista(imgs, n=None, ncols=4, titulo="Nivel", gamma=False, figsize_po
                            squeeze=False)
     for i, a in enumerate(ax.ravel()):
         if i < n:
+            r = rango[i] if isinstance(rango[0], (tuple, list)) else rango   # <- nuevo
+            t = titulos[i] if titulos is not None else f"{titulo} {i}"       # <- nuevo
             h, w = imgs[i].shape[:2]
-            a.imshow(_vis(imgs[i]), cmap="gray", vmin=0, vmax=1)
-            a.set_title(f"{titulo} {i}\n{h} × {w}")
+            a.imshow(_vis(imgs[i], r), cmap="gray", vmin=r[0], vmax=r[1])
+            a.set_title(f"{t}\n{h} × {w}")
         a.axis("off")
     plt.tight_layout()
     plt.show()

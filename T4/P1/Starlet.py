@@ -2,7 +2,6 @@ import io
 import numpy as np
 import matplotlib.pyplot as plt
 import skimage as ski
-import pywt
 from scipy import fft, ndimage as ndi
 from scipy.linalg import hadamard
 from PIL import Image, ImageFilter

@@ -3,7 +3,6 @@ import io
 import numpy as np
 import matplotlib.pyplot as plt
 import skimage as ski
-import pywt
 from scipy import fft, ndimage
 from scipy.linalg import hadamard
 from PIL import Image, ImageFilter
@@ -46,51 +45,56 @@ def modificar_capas(pesos: list, lista: list, tipo):
 
 
 if __name__ == "__main__":
+    s = 0.1 
 
     img = cargar_img("cathedral.tif")
     Yp, shape0 = padding(img) 
 
-    # Probar reconstruccion
+    # # Probar reconstruccion
 
-    piramide, _, _ = piramide_laplaciana(Yp)
-    new_image = reconstruccion_laplace(piramide)
+    # piramide, _, _ = piramide_laplaciana(Yp)
+    # new_image = reconstruccion_laplace(piramide)
 
-    resultado = recortar(new_image, shape0)
-    print(rmse(img, resultado))
+    # resultado = recortar(new_image, shape0)
+    # print(rmse(img, resultado))
 
-    mostrar(img, resultado)
+    # mostrar(img, resultado)
 
-    #Mostrar capa de detalles
-    mostrar_lista(piramide, titulo="Laplace")
+    # #Mostrar capa de detalles
+    # mostrar_lista(piramide,
+    #           titulos=[f"Laplace d{j}" for j in range(1, 6)] + ["Laplace residual"],
+    #           rango=[(-s, s)] * 5 + [(0, 1)])
 
-    capas, c, _, _  = starlet(img, 5)
-    new_image = reconstruccion_starlet(capas, c)
-    print(rmse(img, new_image))
-    mostrar(img, new_image)
-    mostrar_lista(capas, titulo="starlet")
+    # capas, c, _, _  = starlet(img, 5)
+    # new_image = reconstruccion_starlet(capas, c)
+    # print(rmse(img, new_image))
+    # mostrar(img, new_image)
+    # mostrar_lista(capas + [c],
+    #           titulos=[f"Starlet w{j}" for j in range(1, 6)] + ["Starlet residual"],
+    #           rango=[(-s, s)] * 5 + [(0, 1)])
 
-    #Umbral
+    # #Umbral
 
-    for i in [0.01, 0.2]:
+    # for j in [0.01, 0.2]:
 
-        piramide, lista_umbral, coef = piramide_laplaciana(Yp, umbral=True, a=i)
+    #     piramide, lista_umbral, coef = piramide_laplaciana(Yp, umbral=True, a=j)
         
         
-        new_image = reconstruccion_laplace(lista_umbral)
-        print("Piramide Laplaciana")
-        for i in coef:
-            print(i)
+    #     new_image = reconstruccion_laplace(lista_umbral)
+    #     print("Piramide Laplaciana")
+    #     for i in coef:
+    #         print(i)
 
-        resultado = recortar(new_image, shape0)
-        mostrar(img, resultado)
+    #     resultado = recortar(new_image, shape0)
+    #     mostrar(img, resultado, titulos=("Original", f"Laplace α={j}"))
 
-        capas, c, lista_umbral, coef  = starlet(img, 5, umbral=True, a=i)
-        new_image = reconstruccion_starlet(lista_umbral, c)
-        print("Starlet")
-        for i in coef:
-            print(i)
+    #     capas, c, lista_umbral, coef  = starlet(img, 5, umbral=True, a=j)
+    #     new_image = reconstruccion_starlet(lista_umbral, c)
+    #     print("Starlet")
+    #     for i in coef:
+    #         print(i)
         
-        mostrar(img, new_image)
+    #     mostrar(img, new_image, titulos=("Original", f"Starlet α={j}"))
 
     
     p_grueso = [1, 1, 1, 2.5, 2.5]
@@ -110,11 +114,38 @@ if __name__ == "__main__":
     new_image = reconstruccion_starlet(new_capas, c)
 
     mostrar_recortes([img, resultado, new_image],
-                 ["Original", "Laplace", "Starlet"],
+                 ["Original", f"Laplace {p_grueso}", f"Starlet {p_grueso}"],
                  ventana=(250, 250, 150, 150))
+    
+    
+    
+    
+
+    new_piramide = modificar_capas(p_fino, piramide, "Laplace")
+        
+    new_image = reconstruccion_laplace(new_piramide)
+    
+
+    resultado = recortar(new_image, shape0)
 
     
-    mostrar(img - resultado, img - new_image)
+    
+
+    capas, c, lista_umbral, coef  = starlet(img, 5, umbral=True, a=0.1)
+    new_capas = modificar_capas(p_fino, capas, None)
+    new_image = reconstruccion_starlet(new_capas, c)
+    
+
+    mostrar_recortes([img, resultado, new_image],
+                     ["Original", f"Laplace {p_fino}", f"Starlet {p_fino}"],
+                     ventana=(250, 250, 150, 150))
+    mostrar(img - resultado, img - new_image,
+                titulos=("img − Laplace", "img − Starlet"),
+                rango=(-0.1, 0.1), cmap="seismic")
+    
+
+    
+    
     
     
         
