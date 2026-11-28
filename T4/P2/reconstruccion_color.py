@@ -17,19 +17,19 @@ def re_color(E, Y, L_out, factor):
 
     
     # pasar a CIELAB y trabajar en C
-    # idea: cambiar la luminancia con C con cierto porcentaje (parametro), luego normalizar y pasar a RGB
+   
     ref = a_pantalla(E / np.percentile(Y, 99))
     C_og = lab2lch(rgb2lab(ref))
-    #C_og = lab2lch(rgb2lab(a_pantalla(E))) # de la imagen original
+   
 
-    L_mod = rgb2lab(np.stack([a_pantalla(L_out)] * 3, axis=-1))[..., 0] # esta es la luminancia modificada # revisar esto
+    L_mod = rgb2lab(np.stack([a_pantalla(L_out)] * 3, axis=-1))[..., 0] # esta es la luminancia modificada 
 
     lch_mod = np.stack([L_mod, C_og[:,:,1] * factor, C_og[:,:,2]], axis=-1)
     lab_mod = lch2lab(lch_mod)
 
     rgb_lin = lab2xyz(lab_mod) @ M_XYZ2RGB.T
     
-    #new_image = lab2rgb(lch2lab((lch_mod))) # aca se reconstruye la imagen con el nuevo espacio modificado
+    
     fuera_de_rango = np.mean(np.any((rgb_lin < -1e-3) | (rgb_lin > 1 + 1e-3), axis=-1))# esto es para los pixeles fuera de rango 
 
     return lab2rgb(lab_mod) , fuera_de_rango

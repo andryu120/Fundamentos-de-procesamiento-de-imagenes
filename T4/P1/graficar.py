@@ -8,14 +8,14 @@ from matplotlib.patches import Rectangle
 def mostrar(img1, img2, titulos=("Imagen 1", "Imagen 2"), gamma=False,
             rango=(0, 1), cmap="gray"):
     def _vis(Y):
-        Y = np.clip(Y, *rango)          # <- antes: np.clip(Y, 0, 1)
+        Y = np.clip(Y, *rango)          
         if gamma:
             Y = np.where(Y <= 0.0031308, Y * 12.92, 1.055 * Y ** (1 / 2.4) - 0.055)
         return Y
 
     fig, ax = plt.subplots(1, 2, figsize=(12, 6))
     for a, im, t in zip(ax, (img1, img2), titulos):
-        a.imshow(_vis(im), cmap=cmap, vmin=rango[0], vmax=rango[1])  # <- antes: vmin=0, vmax=1
+        a.imshow(_vis(im), cmap=cmap, vmin=rango[0], vmax=rango[1])  # 
         a.set_title(t)
         a.axis("off")
     plt.tight_layout()
@@ -28,7 +28,7 @@ def mostrar(img1, img2, titulos=("Imagen 1", "Imagen 2"), gamma=False,
 def mostrar_lista(imgs, n=None, ncols=3, titulo="Nivel", gamma=False,
                   figsize_por_img=4, rango=(0, 1), titulos=None):
     def _vis(Y, r):
-        Y = np.clip(Y, *r)              # <- antes: np.clip(Y, 0, 1)
+        Y = np.clip(Y, *r)              
         if gamma:
             Y = np.where(Y <= 0.0031308, Y * 12.92, 1.055 * Y ** (1 / 2.4) - 0.055)
         return Y
@@ -43,8 +43,8 @@ def mostrar_lista(imgs, n=None, ncols=3, titulo="Nivel", gamma=False,
                            squeeze=False)
     for i, a in enumerate(ax.ravel()):
         if i < n:
-            r = rango[i] if isinstance(rango[0], (tuple, list)) else rango   # <- nuevo
-            t = titulos[i] if titulos is not None else f"{titulo} {i}"       # <- nuevo
+            r = rango[i] if isinstance(rango[0], (tuple, list)) else rango   
+            t = titulos[i] if titulos is not None else f"{titulo} {i}"       
             h, w = imgs[i].shape[:2]
             a.imshow(_vis(imgs[i], r), cmap="gray", vmin=r[0], vmax=r[1])
             a.set_title(f"{t}\n{h} × {w}")
@@ -57,12 +57,11 @@ def mostrar_recortes(imagenes, titulos, ventana, rango=(0, 1), figsize_por_img=4
                      color_caja="red"):
     """
     Fila superior: imágenes completas con la ventana marcada.
-    Fila inferior: recorte ampliado (interpolación 'nearest', se ven los píxeles).
-    Misma ventana y mismo rango de visualización para todas.
+    Fila inferior: recorte ampliado
  
-    imagenes : lista de arrays 2D del MISMO tamaño (recortar el padding antes)
+    imagenes : lista de arrays 2D del mismo tamaño 
     titulos  : lista de strings (incluya parámetros: alpha, ganancias, ...)
-    ventana  : (y0, x0, alto, ancho) en píxeles
+    ventana  : (y0, x0, alto, ancho) en pixeles
     rango    : (vmin, vmax); para capas con signo use (-s, s)
     """
     y0, x0, h, w = ventana
