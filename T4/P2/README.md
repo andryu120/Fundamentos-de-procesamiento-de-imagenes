@@ -1,6 +1,6 @@
 # Pregunta 2: Compresión HDR y recuperación de color
 
-Este directorio contiene la implementación de la Pregunta 1
+Este directorio contiene la implementación de la Pregunta 2
 
 ## Estructura de Archivos
 * **`procesamiento.py`:** Funciones para cargar la imagen y calcular filtro homorfico/durand por canal

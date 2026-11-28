@@ -16,4 +16,4 @@ Para generar las imágenes modificadas que se analizan en el informe, ejecute:
 ```bash
 python main.py
 ```
-Los resultados se mostraran en pantalla
+Los resultados se mostraran en pantalla y en la terminal si corresponde
