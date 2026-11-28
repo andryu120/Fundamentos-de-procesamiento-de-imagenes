@@ -16,4 +16,9 @@ Este repositorio contiene las tareas del curso IEE2714. Dentro de cada carpeta s
     * `Pregunta_1/`: Eliminación de ruido periódico mediante filtrado notch.
     * `Pregunta_2/`: Deconvolución de Wiener y Tikhonov iterativo
 
+* `T4`:
+    * `Pregunta_1/`: Pirámide Laplaciana y transformada starlet
+    * `Pregunta_2/`: Compresión HDR y recuperación de color
+
+
 

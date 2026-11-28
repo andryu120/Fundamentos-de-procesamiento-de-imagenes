@@ -50,51 +50,51 @@ if __name__ == "__main__":
     img = cargar_img("cathedral.tif")
     Yp, shape0 = padding(img) 
 
-    # # Probar reconstruccion
+    # Probar reconstruccion
 
-    # piramide, _, _ = piramide_laplaciana(Yp)
-    # new_image = reconstruccion_laplace(piramide)
+    piramide, _, _ = piramide_laplaciana(Yp)
+    new_image = reconstruccion_laplace(piramide)
 
-    # resultado = recortar(new_image, shape0)
-    # print(rmse(img, resultado))
+    resultado = recortar(new_image, shape0)
+    print(rmse(img, resultado))
 
-    # mostrar(img, resultado)
+    mostrar(img, resultado)
 
-    # #Mostrar capa de detalles
-    # mostrar_lista(piramide,
-    #           titulos=[f"Laplace d{j}" for j in range(1, 6)] + ["Laplace residual"],
-    #           rango=[(-s, s)] * 5 + [(0, 1)])
+    #Mostrar capa de detalles
+    mostrar_lista(piramide,
+              titulos=[f"Laplace d{j}" for j in range(1, 6)] + ["Laplace residual"],
+              rango=[(-s, s)] * 5 + [(0, 1)])
 
-    # capas, c, _, _  = starlet(img, 5)
-    # new_image = reconstruccion_starlet(capas, c)
-    # print(rmse(img, new_image))
-    # mostrar(img, new_image)
-    # mostrar_lista(capas + [c],
-    #           titulos=[f"Starlet w{j}" for j in range(1, 6)] + ["Starlet residual"],
-    #           rango=[(-s, s)] * 5 + [(0, 1)])
+    capas, c, _, _  = starlet(img, 5)
+    new_image = reconstruccion_starlet(capas, c)
+    print(rmse(img, new_image))
+    mostrar(img, new_image)
+    mostrar_lista(capas + [c],
+              titulos=[f"Starlet w{j}" for j in range(1, 6)] + ["Starlet residual"],
+              rango=[(-s, s)] * 5 + [(0, 1)])
 
-    # #Umbral
+    #Umbral
 
-    # for j in [0.01, 0.2]:
+    for j in [0.01, 0.2]:
 
-    #     piramide, lista_umbral, coef = piramide_laplaciana(Yp, umbral=True, a=j)
+        piramide, lista_umbral, coef = piramide_laplaciana(Yp, umbral=True, a=j)
         
         
-    #     new_image = reconstruccion_laplace(lista_umbral)
-    #     print("Piramide Laplaciana")
-    #     for i in coef:
-    #         print(i)
+        new_image = reconstruccion_laplace(lista_umbral)
+        print("Piramide Laplaciana")
+        for i in coef:
+            print(i)
 
-    #     resultado = recortar(new_image, shape0)
-    #     mostrar(img, resultado, titulos=("Original", f"Laplace α={j}"))
+        resultado = recortar(new_image, shape0)
+        mostrar(img, resultado, titulos=("Original", f"Laplace α={j}"))
 
-    #     capas, c, lista_umbral, coef  = starlet(img, 5, umbral=True, a=j)
-    #     new_image = reconstruccion_starlet(lista_umbral, c)
-    #     print("Starlet")
-    #     for i in coef:
-    #         print(i)
+        capas, c, lista_umbral, coef  = starlet(img, 5, umbral=True, a=j)
+        new_image = reconstruccion_starlet(lista_umbral, c)
+        print("Starlet")
+        for i in coef:
+            print(i)
         
-    #     mostrar(img, new_image, titulos=("Original", f"Starlet α={j}"))
+        mostrar(img, new_image, titulos=("Original", f"Starlet α={j}"))
 
     
     p_grueso = [1, 1, 1, 2.5, 2.5]
